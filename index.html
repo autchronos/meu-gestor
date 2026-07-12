@@ -5,6 +5,34 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Autchronos — Gestão financeira e fluxo de caixa</title>
+
+    <!--
+      Anti-FOUC. Sem isto, o React só aplica a classe `dark` num useEffect, ou
+      seja, DEPOIS do primeiro paint: quem escolheu o tema escuro vê o fundo
+      creme piscar a cada recarga. Este script é síncrono e bloqueante de
+      propósito — ele roda antes do bundle e antes do primeiro paint.
+
+      A lógica é EQUIVALENTE à de temaInicial() em src/lib/tema.ts (tema salvo
+      manda; sem nada salvo, cai na preferência do sistema) e a chave é a mesma
+      CHAVE_TEMA = 'autchronos:tema'. Se as duas divergirem, o app volta a
+      piscar: mude sempre as duas juntas.
+    -->
+    <script>
+      (function () {
+        try {
+          var salvo = localStorage.getItem('autchronos:tema')
+          var tema =
+            salvo === 'claro' || salvo === 'escuro'
+              ? salvo
+              : window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'escuro'
+                : 'claro'
+          document.documentElement.classList.toggle('dark', tema === 'escuro')
+        } catch (e) {
+          /* localStorage bloqueado (modo privado/iframe): fica no tema claro, o padrão. */
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
