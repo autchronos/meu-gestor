@@ -193,7 +193,51 @@ lê os itens daquele negócio para traduzir "açaí de 300" no `item_id` correto
 
 ---
 
-## 7. O que este documento NÃO altera
+## 7. Roteiro de distribuição (PWA → Play Store → iOS)
+
+**Não construir agora.** Registrado para que as decisões de arquitetura não fechem portas.
+A boa notícia: o Autchronos é um SPA estático puro (sem servidor próprio, sem SSR), e isso
+já é exatamente o que os três caminhos abaixo exigem. **Nada precisa ser refeito.**
+
+### 7.1 PWA instalável (Fase 7) — barato e já planejado
+
+`vite-plugin-pwa` + manifest + ícones + service worker. Instalável no Android, no iPhone
+(via "Adicionar à Tela de Início") e no desktop (Windows/Mac). É o alicerce dos outros dois.
+
+### 7.2 Google Play — viável e barato
+
+O Google tem um caminho oficial: **TWA (Trusted Web Activity)**, empacotado com Bubblewrap.
+Na prática, embrulha o mesmo PWA num APK. Registro de desenvolvedor: **US$ 25, pagamento
+único**. Não exige reescrever nada.
+
+### 7.3 Apple App Store — caro, lento, e com três travas reais
+
+1. **A Apple rejeita "PWA embrulhado".** A diretriz 4.2 (Minimum Functionality) barra app que
+   é só um site dentro de um navegador. Para passar, precisa de recurso nativo de verdade
+   (push, câmera, biometria). Caminho: **Capacitor** — que roda o nosso mesmo código dentro
+   de um app nativo.
+2. **Não se publica na Apple a partir do Windows.** Compilar e assinar iOS exige macOS com
+   Xcode. Saídas: Mac na nuvem (Codemagic, EAS Build) ou um Mac de verdade. É trava da Apple,
+   não nossa.
+3. **US$ 99/ano**, revisão manual que reprova e volta, política de privacidade obrigatória, e
+   — como o app tem contas — **exclusão de conta dentro do app é obrigatória** pela Apple.
+
+### 7.4 A ordem, e o porquê
+
+**PWA (Fase 7) → Play Store (TWA) → validar com usuários reais (Fase 8) → só então iOS.**
+
+Gastar US$ 99/ano, alugar Mac e brigar com a revisão da Apple ANTES de saber se o app é bom
+é pagar caro por um produto que ainda vai mudar muito. A Fase 8 (2-3 micro-empreendedores
+reais usando) existe justamente para dizer o que vale virar app nativo.
+
+### 7.5 O que isso BLOQUEIA agora
+
+**A logo.** Loja de app exige ícone de verdade, 1024×1024. O favicon atual é um monograma "A"
+placeholder. Isso vira bloqueio real na Fase 7 — decisão pendente do dono.
+
+---
+
+## 8. O que este documento NÃO altera
 
 Todas as decisões D1–D8 e o modelo de dados da seção 5 do plano original seguem
 valendo sem mudança. Este documento fecha apenas A1, A2 e A3.
