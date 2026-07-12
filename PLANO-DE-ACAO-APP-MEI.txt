@@ -1,0 +1,461 @@
+================================================================================
+PLANO DE ACAO - APP DE GESTAO FINANCEIRA E FLUXO DE CAIXA PARA MICRO-EMPREENDEDORES
+================================================================================
+Data: 12/07/2026
+Origem: derivado das ideias do app "Pantera Roxa - Controle Financeiro" (acai),
+        mas em REPOSITORIO NOVO, PASTA NOVA, NOME NOVO, LOGO NOVA, DESIGN NOVO.
+        O Pantera Roxa NAO deve ser modificado nem migrado. Ele continua rodando.
+
+COMO USAR ESTE ARQUIVO:
+        Crie a pasta nova, coloque este .txt dentro dela, abra o Claude Code
+        nessa pasta e diga: "leia PLANO-DE-ACAO-APP-MEI.txt e vamos comecar
+        pela Fase 0". O arquivo e auto-contido: tem todo o contexto necessario.
+
+
+================================================================================
+1. VISAO DO PRODUTO
+================================================================================
+
+O QUE E:
+    App web instalavel no celular (PWA) onde qualquer micro-empreendedor
+    controla o dinheiro do negocio dele: o que entrou, o que saiu, quem ficou
+    devendo, quanto sobrou no fim do mes.
+
+PARA QUEM:
+    MEI e informal - a pessoa que vende acai, faz unha, revende roupa, presta
+    servico ou aluga equipamento. Nao e contador. Nao quer planilha. Usa o
+    celular com uma mao enquanto atende.
+
+PRINCIPIO CENTRAL (o que faz o app valer a pena):
+    LANCAR UMA VENDA TEM QUE SER MAIS RAPIDO DO QUE ANOTAR NUM CADERNO.
+    Se lancar uma venda levar mais de 3 toques, o usuario abandona o app e
+    volta pro caderno. Toda decisao de design se subordina a isso.
+
+DIFERENCA-CHAVE PARA O PANTERA ROXA:
+    O Pantera Roxa tem o negocio codificado no banco (sabor banana/morango/
+    maracuja, tamanho 300ml/500ml, contagem de "garrafas"). O app novo nao
+    sabe o que voce vende - ele aprende no onboarding, atraves de um CATALOGO
+    DE ITENS configuravel pelo proprio usuario.
+
+
+================================================================================
+2. DECISOES JA TOMADAS (nao reabrir sem motivo forte)
+================================================================================
+
+[D1] MODELO DE PRODUTO: fork configuravel agora, SaaS depois.
+     O schema ja nasce MULTI-TENANT (isolamento por negocio_id, nao por
+     user_id), mas o MVP NAO tem cobranca, planos nem faturamento.
+     MOTIVO: acertar o schema agora custa pouco; refazer depois custa caro.
+
+[D2] CATALOGO SIMPLES DE ITENS (sem variacoes).
+     Cada item = nome, preco, unidade, controla_estoque (sim/nao), tipo
+     (venda ou aluguel). Quem precisa de variacao cadastra "Acai 300ml Banana"
+     como item proprio. Variacoes ficam para a v2, se um dia forem pedidas.
+
+[D3] FIADO + PARCEIROS FUNDIDOS EM "A RECEBER".
+     No Pantera Roxa sao dois modulos que fazem quase a mesma coisa (alguem
+     levou e vai pagar depois). Viram um so, com o cliente marcado como pessoa
+     fisica ou empresa. Elimina um modulo inteiro sem perder funcao.
+
+[D4] CONTAS A PAGAR FICA PARA A V2.
+     Reconhecidamente e o que completa um "fluxo de caixa" de verdade (aluguel
+     vence dia 10), mas incha o MVP. Entra na v2 como primeira feature.
+
+[D5] ONBOARDING COM TEMPLATES DE RAMO.
+     No primeiro acesso o usuario escolhe o ramo e o app JA CRIA categorias de
+     saida e itens de exemplo apropriados. Ele edita o que quiser.
+     MOTIVO: cair num app vazio e onde a maioria desiste.
+     RAMOS: Alimentacao, Beleza, Revenda, Servicos, Locacao.
+     IMPLEMENTACAO: os templates sao DADO, nao codigo - um arquivo
+     src/templates/ramos.ts com um array. Adicionar um ramo = editar o array.
+
+[D6] LOCACAO DE ITENS (nao aluguel de imovel).
+     Item que SAI E VOLTA: vestido, som, brinquedo, ferramenta, mesa/cadeira.
+     Tem periodo (retirada -> devolucao prevista), o estoque e RESERVADO e nao
+     consumido, e o dono precisa ver o que esta "na rua" e o que esta atrasado.
+     Aluguel recorrente de imovel/quarto (receita fixa mensal) NAO entra.
+
+[D7] REPOSITORIO NOVO, reaproveitando a base tecnica do Pantera Roxa.
+     Copia-se a fundacao ja testada (Supabase+RLS, TanStack Query, export PDF,
+     PWA, setup de testes, padrao de modulos). Reescreve-se a camada de dominio.
+     NAO se migra o Pantera Roxa. NAO se cria monorepo.
+
+[D8] LOGICA DE NEGOCIO EM FUNCOES PURAS, fora dos componentes.
+     Foi a melhor decisao do projeto atual (calcRelatorio.ts, vendaRapida.ts,
+     calcEvolucao.ts) - e o que permite testar de verdade. Mantido.
+
+
+================================================================================
+3. DECISOES EM ABERTO (definir na Fase 0)
+================================================================================
+
+[A1] NOME DO APP.
+     Neste documento e chamado de "Caixa MEI" apenas como nome de trabalho.
+     Escolher o definitivo antes do primeiro commit (afeta package.json,
+     manifest do PWA, titulo, dominio).
+
+[A2] IDENTIDADE VISUAL / LOGO / PALETA.
+     O Pantera Roxa e roxo (#AA00FF) sobre preto, com fonte display. O app novo
+     precisa de identidade PROPRIA - nao herdar a paleta.
+     Sugestao de direcao (a discutir): o publico e amplo e nao "noturno" como
+     o Pantera Roxa; considerar um tema claro por padrao, com tom de confianca
+     (verde/azul) e o dinheiro como unico acento forte (entrada verde, saida
+     vermelha). DECIDIR JUNTO, com mockup, antes de escrever CSS.
+
+[A3] DOMINIO / DEPLOY.
+     Vercel de novo (funcionou), mas conta/projeto/dominio novos.
+
+
+================================================================================
+4. STACK TECNICA
+================================================================================
+
+    React 19 + Vite + TypeScript
+    Tailwind CSS (tema NOVO - nao copiar o tema Pantera Roxa)
+    TanStack Query v5        - cache e sincronizacao
+    Supabase                 - PostgreSQL + Auth + RLS + Realtime
+    Recharts                 - graficos
+    jsPDF + autoTable        - exportacao PDF
+    Vitest + Testing Library - testes
+    vite-plugin-pwa          - instalavel no celular
+    Vercel                   - deploy
+
+    Alias "@/" apontando para src/ (como no projeto atual).
+
+
+================================================================================
+5. MODELO DE DADOS (Supabase / PostgreSQL)
+================================================================================
+
+REGRA DE OURO DO ISOLAMENTO:
+    Toda tabela de dado do negocio tem negocio_id. Toda policy de RLS pergunta
+    "o usuario logado e membro deste negocio?" - nunca "este user_id e o dono
+    da linha?". Isso e o que destrava o SaaS depois sem migracao.
+
+    Funcao auxiliar usada por todas as policies:
+
+        CREATE FUNCTION e_membro(n_id UUID) RETURNS BOOLEAN AS $$
+          SELECT EXISTS (
+            SELECT 1 FROM negocio_usuarios
+            WHERE negocio_id = n_id AND user_id = auth.uid()
+          );
+        $$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+TABELAS:
+
+  negocios
+      id, nome, ramo (alimentacao|beleza|revenda|servicos|locacao|outro),
+      created_at
+      -> o "tenant". No MVP, um por dono.
+
+  negocio_usuarios
+      negocio_id, user_id, papel (dono|operador), created_at
+      PK composta (negocio_id, user_id)
+      -> a ponte que torna tudo multi-tenant. No MVP so existe "dono".
+
+  itens                                    [substitui estoque+precos do PR]
+      id, negocio_id, nome, preco NUMERIC(10,2), unidade TEXT,
+      tipo (venda|aluguel), controla_estoque BOOL, estoque INT DEFAULT 0,
+      ativo BOOL DEFAULT true, created_at
+      -> o catalogo. E aqui que o MEI configura o negocio dele.
+      -> unidade: 'un' | 'kg' | 'hora' | 'servico' | 'diaria' (texto livre)
+      -> estoque mora na propria linha do item (nao numa tabela separada):
+         o item ja e a unidade de estoque, nao ha sabor x tamanho.
+      -> ativo=false em vez de DELETE: preserva o historico de vendas.
+
+  categorias
+      id, negocio_id, nome, tipo (entrada|saida), created_at
+      UNIQUE (negocio_id, nome, tipo)
+      -> semeadas pelo template de ramo no onboarding.
+
+  clientes
+      id, negocio_id, nome, telefone TEXT NULL,
+      tipo (pessoa|empresa) DEFAULT 'pessoa', created_at
+      -> unifica os "clientes" do fiado com os "parceiros" B2B do PR.
+
+  lancamentos
+      id, negocio_id, tipo (entrada|saida), descricao, valor NUMERIC(10,2),
+      data DATE, categoria_id NULL, receber_id NULL, created_at
+      -> o caixa. Coracao do app.
+      -> receber_id: preenchido quando a entrada veio de uma conta a receber
+         que foi paga (ON DELETE CASCADE). NULL = lancamento normal.
+
+  lancamento_itens                          [NOVO - nao existe no PR]
+      id, lancamento_id (CASCADE), item_id, quantidade INT,
+      preco_unitario NUMERIC(10,2)
+      -> os itens vendidos naquele lancamento. E o que substitui o
+         qtd_300/qtd_500 chumbado do Pantera Roxa.
+      -> preco_unitario e COPIADO no momento da venda: se o preco do item
+         mudar amanha, o historico continua correto. (No PR isso e um bug
+         latente - o relatorio recalcularia com o preco novo.)
+      -> alimenta: contador de vendas/itens do dia, ranking de mais vendidos,
+         e a baixa de estoque.
+
+  receber                                   [substitui fiados + parceiros]
+      id, negocio_id, cliente_id, descricao, valor NUMERIC(10,2),
+      data DATE, vencimento DATE NULL, pago BOOL DEFAULT false, created_at
+      -> ao marcar pago=true, um TRIGGER cria a entrada no caixa
+         (mesma mecanica de sync_fiado_lancamento do PR, que funciona bem:
+          idempotente, e ao despagar remove a entrada).
+
+  locacoes                                  [NOVO]
+      id, negocio_id, item_id, cliente_id, quantidade INT,
+      valor NUMERIC(10,2), data_retirada DATE,
+      devolucao_prevista DATE, devolvido_em DATE NULL, created_at
+      -> item na rua. devolvido_em NULL = ainda esta fora.
+      -> "atrasado" = devolvido_em IS NULL AND devolucao_prevista < hoje.
+      -> a reserva de estoque e DERIVADA (soma das locacoes abertas), nao
+         uma coluna - assim nunca dessincroniza.
+
+  metas
+      negocio_id PK, meta_faturamento, meta_lucro, updated_at
+
+TRIGGERS / REGRAS NO BANCO:
+    T1. receber.pago true -> INSERT entrada em lancamentos (idempotente).
+        receber.pago false -> DELETE dessa entrada.
+    T2. Baixa de estoque na venda: ao inserir lancamento_itens de um item com
+        controla_estoque e tipo=venda, decrementa itens.estoque.
+        (Alternativa mais segura: fazer isso numa funcao RPC transacional
+         "registrar_venda" - decidir na Fase 3.)
+    T3. Locacao NAO decrementa estoque. Estoque disponivel de item de aluguel
+        = itens.estoque - (soma das quantidades de locacoes abertas).
+
+NOTA SOBRE MOEDA:
+    NUMERIC(10,2) no banco (correto). No TypeScript vira number - aceitavel
+    para os valores em jogo, mas NUNCA somar/multiplicar float em cadeia longa
+    no front. Os calculos de relatorio devem arredondar ao final.
+
+
+================================================================================
+6. MODULOS DO APP (MVP)
+================================================================================
+
+  INICIO (dashboard)
+      Cards: caixa de hoje | saldo do mes | a receber | lucro do mes
+      Barra de progresso da meta de lucro
+      Contador do dia: "X vendas - Y itens"
+      Se o ramo for locacao: "X itens na rua - Y atrasados" (em vermelho)
+      Grafico de evolucao mensal
+      Cada card navega para o modulo correspondente.
+
+  CAIXA
+      Lista de entradas e saidas com filtro de periodo (hoje/semana/mes/tudo)
+      Paginacao "ver mais" de 25 em 25
+      VENDA RAPIDA: grade de botoes com os itens do catalogo. Toca no item ->
+        ajusta quantidade -> confirma. Gera lancamento + lancamento_itens +
+        baixa de estoque, tudo de uma vez. E O CAMINHO MAIS IMPORTANTE DO APP.
+      Saida: valor + descricao + categoria.
+
+  A RECEBER
+      Lista de quem deve, agrupada por cliente, com total devido
+      Filtro: pendentes / pagos / todos
+      Registro rapido: escolhe cliente -> escolhe itens -> vira divida
+      Marcar como pago -> cai automaticamente no caixa (trigger T1)
+      Vencimento opcional; destaca os vencidos.
+
+  CATALOGO
+      CRUD dos itens: nome, preco, unidade, tipo (venda/aluguel),
+      controla estoque (sim/nao), estoque inicial
+      Desativar item (nao apagar - preserva historico)
+      E a tela de configuracao do negocio, na pratica.
+
+  ESTOQUE
+      So os itens com controla_estoque=true
+      Ajuste rapido de quantidade (+/-)
+      Alerta visual de estoque baixo (<= 3, configuravel depois)
+      Para itens de aluguel: mostra "total / na rua / disponivel"
+
+  LOCACOES   [so aparece se o negocio tiver algum item tipo=aluguel]
+      Lista do que esta na rua, ordenado por devolucao prevista
+      Atrasados no topo, em vermelho
+      Registrar saida: item + cliente + qtd + valor + previsao de devolucao
+      Botao "devolveu" -> baixa a locacao, libera o estoque
+
+  RELATORIO
+      Faturamento, saidas, lucro do periodo
+      Grafico
+      Meta mensal (definir/editar)
+      Ranking dos itens mais vendidos (novo - possibilitado por lancamento_itens)
+      Exportar PDF e CSV
+
+  CONFIG
+      Dados do negocio, categorias, meta, sair da conta
+
+
+================================================================================
+7. ESTRUTURA DE PASTAS
+================================================================================
+
+    src/
+      components/        Header, Sidebar, NavTabs, Card, EmptyState, ConfirmDialog
+      lib/               supabase.ts, queryClient.ts
+      templates/         ramos.ts        <- os 5 templates de onboarding
+      types/             index.ts
+      utils/             format.ts, export.ts
+      modules/
+        auth/            Login, Cadastro
+        onboarding/      escolha de ramo + seed inicial
+        dashboard/       Dashboard, useDashboard, calcDashboard, EvolucaoChart
+        caixa/           Caixa, CaixaForm, CaixaList, VendaRapida, useLancamentos,
+                         registrarVenda.ts (funcao pura)
+        receber/         Receber, ReceberForm, ReceberList, useReceber
+        catalogo/        Catalogo, ItemForm, useItens
+        estoque/         Estoque, useEstoque, calcDisponivel.ts (funcao pura)
+        locacoes/        Locacoes, LocacaoForm, useLocacoes, calcAtrasos.ts
+        relatorio/       Relatorio, RelatorioChart, calcRelatorio.ts, useMetas
+        config/          Config
+    tests/
+      (espelha modules/ - so as funcoes puras e os calculos)
+    supabase/
+      schema.sql
+      migrations/
+
+    PADRAO POR MODULO (herdado do Pantera Roxa, funcionou bem):
+      Componente .tsx  -> so renderiza
+      useX.ts          -> so busca/muta dados (TanStack Query)
+      calcX.ts         -> funcao pura, sem React, sem Supabase -> E O QUE SE TESTA
+
+
+================================================================================
+8. FASES DE IMPLEMENTACAO
+================================================================================
+Cada fase e um entregavel que FUNCIONA e pode ser commitado. Nao pular pra
+frente com fase anterior quebrada.
+
+--- FASE 0: FUNDACAO E IDENTIDADE ------------------------------------------
+    [ ] Definir o NOME do app                                        [A1]
+    [ ] Definir logo, paleta e direcao visual (com mockup)           [A2]
+    [ ] Criar projeto Vite (React+TS) na pasta nova, git init
+    [ ] Instalar deps, configurar Tailwind com o tema NOVO, alias @/
+    [ ] Criar projeto Supabase NOVO (nao reusar o do Pantera Roxa)
+    [ ] .env.local + .env.local.example
+    [ ] Configurar Vitest + Testing Library
+    ENTREGA: app roda em branco, com a identidade visual nova aplicada.
+
+--- FASE 1: BANCO E AUTENTICACAO -------------------------------------------
+    [ ] schema.sql completo (secao 5), com RLS em todas as tabelas
+    [ ] Funcao e_membro() + policies baseadas nela
+    [ ] Trigger T1 (a receber pago -> entrada no caixa)
+    [ ] Tela de Login + Cadastro (Supabase Auth, email/senha)
+    [ ] Guard de sessao no App.tsx
+    ENTREGA: da pra criar conta, logar e o banco esta protegido por RLS.
+    TESTE MANUAL OBRIGATORIO: criar 2 contas e confirmar que uma NAO ve os
+    dados da outra. Isso e seguranca, nao e feature - nao pular.
+
+--- FASE 2: ONBOARDING E CATALOGO ------------------------------------------
+    [ ] src/templates/ramos.ts com os 5 ramos:
+          ALIMENTACAO  cat.saida: Insumo, Embalagem, Gas/Energia, Transporte
+                       itens: (exemplos do ramo, editaveis)
+          BELEZA       cat.saida: Produto, Material, Aluguel de cadeira, Marketing
+                       itens: servicos por hora/sessao
+          REVENDA      cat.saida: Compra de mercadoria, Frete, Embalagem
+                       itens: produtos com controla_estoque=true
+          SERVICOS     cat.saida: Material, Transporte, Ferramenta
+                       itens: servicos com controla_estoque=false
+          LOCACAO      cat.saida: Manutencao, Limpeza, Transporte
+                       itens: tipo=aluguel, controla_estoque=true, unidade=diaria
+    [ ] Fluxo: primeiro login -> nao tem negocio -> escolhe ramo -> cria
+        negocio + negocio_usuarios + categorias + itens de exemplo
+    [ ] Modulo Catalogo (CRUD de itens)
+    ENTREGA: usuario novo escolhe o ramo e ja tem itens e categorias na mao.
+
+--- FASE 3: CAIXA E VENDA RAPIDA -------------------------------------------
+    [ ] Lancamentos: listar, criar entrada, criar saida com categoria
+    [ ] Filtro de periodo + paginacao "ver mais" (25)
+    [ ] VENDA RAPIDA: grade de itens -> quantidade -> confirma
+    [ ] registrarVenda.ts como funcao pura + testes
+    [ ] Gravacao transacional (lancamento + lancamento_itens + baixa de
+        estoque) - preferir RPC no Supabase a 3 inserts soltos do front
+    ENTREGA: da pra vender em 3 toques. O app ja e util aqui.
+    >>> ESTE E O MARCO. Se so isso existir, o app ja substitui o caderno.
+
+--- FASE 4: A RECEBER ------------------------------------------------------
+    [ ] Clientes (CRUD leve, com tipo pessoa/empresa)
+    [ ] Registrar divida (avulsa ou por itens do catalogo)
+    [ ] Lista agrupada por cliente, filtro pendente/pago
+    [ ] Marcar pago -> entrada automatica no caixa (validar o trigger T1)
+    [ ] Vencimento opcional, destaque de vencidos
+    ENTREGA: o fiado do caderno acabou.
+
+--- FASE 5: ESTOQUE E LOCACOES ---------------------------------------------
+    [ ] Estoque: lista dos itens que controlam, ajuste +/-, alerta de baixo
+    [ ] calcDisponivel.ts (estoque - locacoes abertas) + testes
+    [ ] Locacoes: registrar saida, lista do que esta na rua, atrasados no topo
+    [ ] Botao "devolveu"
+    [ ] Modulo Locacoes so aparece se houver item tipo=aluguel
+    ENTREGA: quem aluga sabe o que esta na rua e o que atrasou.
+
+--- FASE 6: RELATORIO E DASHBOARD ------------------------------------------
+    [ ] calcRelatorio.ts (faturamento, saidas, lucro) + testes
+    [ ] Grafico + meta mensal
+    [ ] Ranking de itens mais vendidos
+    [ ] Dashboard com os 4 cards, meta, contador do dia, evolucao
+    [ ] Exportar PDF e CSV
+    ENTREGA: o dono ve se o mes fechou no azul.
+
+--- FASE 7: PWA E DEPLOY ---------------------------------------------------
+    [ ] vite-plugin-pwa, manifest com o nome/logo NOVOS, icones 192/512
+    [ ] Deploy na Vercel + variaveis de ambiente
+    [ ] Teste real: instalar no celular e usar por um dia
+    ENTREGA: app instalado, rodando, na mao de gente de verdade.
+
+--- FASE 8: VALIDACAO COM USUARIO REAL -------------------------------------
+    [ ] Colocar na mao de 2-3 micro-empreendedores de ramos diferentes
+    [ ] Observar SEM ajudar - onde travam e onde o app mente
+    [ ] So depois disso decidir a v2
+    ISSO NAO E OPCIONAL. Um app generico so prova que e generico com mais de
+    um ramo usando de verdade.
+
+
+================================================================================
+9. V2 (nao construir agora - anotado para nao esquecer)
+================================================================================
+    - CONTAS A PAGAR (fornecedor, vencimento, alerta) <- primeira da fila [D4]
+    - Multiplos usuarios por negocio (dono + funcionario, papeis)
+    - Cobranca / planos (o schema ja aguenta)
+    - Variacoes de item (tamanho, cor)
+    - Recibo / comprovante para o cliente
+    - Cobranca via WhatsApp, PIX copia-e-cola
+    - Aluguel recorrente (imovel, quarto, ponto)
+    - Modo offline de verdade (fila de sincronizacao)
+
+
+================================================================================
+10. RISCOS E ARMADILHAS (aprendidos no Pantera Roxa)
+================================================================================
+
+  R1. GENERALIZAR DEMAIS E NAO SERVIR PRA NINGUEM.
+      O Pantera Roxa e otimo porque sabe o que e uma garrafa de 500ml. Ao tirar
+      isso, o app fica poderoso e vazio. O ANTIDOTO SAO OS TEMPLATES DE RAMO:
+      eles devolvem a especificidade. Se o onboarding for fraco, o app fracassa
+      por mais bem-arquitetado que esteja.
+
+  R2. PRECO HISTORICO.
+      Guardar preco_unitario em lancamento_itens no momento da venda. Se
+      referenciar o preco atual do item, todo relatorio antigo muda quando o
+      preco sobe. (O Pantera Roxa tem esse problema latente com a tabela precos.)
+
+  R3. VENDA NAO-ATOMICA.
+      Lancamento + itens + baixa de estoque tem que ser UMA transacao. Tres
+      inserts soltos do front deixam estoque errado quando a rede cai no meio.
+      Usar RPC no Supabase.
+
+  R4. RLS FRACA.
+      Multi-tenant sem RLS correta = vazar dado de um negocio pro outro. Testar
+      com duas contas de verdade na Fase 1. Nao confiar em filtro no front.
+
+  R5. FUSO HORARIO.
+      O Pantera Roxa usa America/Sao_Paulo explicito no trigger. Manter. "Hoje"
+      calculado em UTC vira bug de venda aparecendo no dia errado depois das 21h.
+
+  R6. ESCOPO.
+      As fases sao sequenciais de proposito. A tentacao de fazer contas a pagar
+      "ja que estou aqui" e o que mata o MVP. Fase 3 entregue > v2 imaginada.
+
+
+================================================================================
+FIM DO PLANO
+================================================================================
+Proximo passo concreto: criar a pasta, colar este arquivo dentro, abrir o
+Claude Code nela e comecar pela FASE 0 - definindo o nome e a identidade visual,
+que sao as duas coisas que travam todo o resto.
