@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Estado interno do processo de execucao de planos (scratch)
+.superpowers/
