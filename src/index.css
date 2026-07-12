@@ -27,6 +27,15 @@
   --cor-meta-texto: #D9A93C;
 }
 
+/* ---- A paleta padrão do Tailwind não existe neste projeto ----
+   Apagar --color-* faz `text-green-600`, `bg-blue-500` etc. deixarem de gerar
+   CSS: a classe simplesmente não vira regra nenhuma. O contrato de cor passa a
+   se defender sozinho — o sistema falha em "sem cor", nunca em "cor errada".
+   As ÚNICAS cores do app são os tokens semânticos declarados logo abaixo. */
+@theme {
+  --color-*: initial;
+}
+
 /* ---- Os tokens viram utilitários do Tailwind ---- */
 @theme inline {
   --color-fundo: var(--cor-fundo);
