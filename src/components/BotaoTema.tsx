@@ -1,4 +1,4 @@
-import { useTema } from '@/lib/useTema'
+import { useTema } from '@/hooks/useTema'
 
 export function BotaoTema() {
   const { tema, alternar } = useTema()
