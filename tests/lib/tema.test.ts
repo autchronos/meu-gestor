@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest'
 import { temaInicial, alternarTema } from '@/lib/tema'
 
 describe('temaInicial', () => {

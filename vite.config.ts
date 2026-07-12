@@ -12,7 +12,8 @@ export default defineConfig({
     },
   },
   test: {
-    globals: true,
+    // Sem globals: cada teste importa describe/it/expect de 'vitest'.
+    // Globais de teste vazariam para o type-check de src/ tambem.
     environment: 'jsdom',
     setupFiles: './tests/setup.ts',
   },
