@@ -16,5 +16,9 @@ export default defineConfig({
     // Globais de teste vazariam para o type-check de src/ tambem.
     environment: 'jsdom',
     setupFiles: './tests/setup.ts',
+    // Os testes de integracao falam com um Postgres de verdade — bem mais lento
+    // que jsdom. Sem isto, falhariam por timeout e nao por defeito.
+    testTimeout: 20000,
+    hookTimeout: 30000,
   },
 })
