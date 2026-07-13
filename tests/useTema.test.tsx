@@ -1,9 +1,42 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import App from '@/App'
 import { TemaProvider } from '@/hooks/TemaProvider'
 import { useTema } from '@/hooks/temaContexto'
 import { CHAVE_TEMA } from '@/lib/tema'
+
+// O botao de tema (BotaoTema) agora vive DENTRO do guard de sessao (Task 6):
+// so aparece com sessao ativa. Estes testes existem para provar useTema, nao
+// autenticacao — entao simulamos uma sessao ja logada, sem tocar a rede.
+vi.mock('@/lib/supabase', () => ({
+  supabase: {
+    auth: {
+      getSession: vi.fn().mockResolvedValue({
+        data: {
+          session: {
+            access_token: 'token-fake',
+            refresh_token: 'refresh-fake',
+            expires_in: 3600,
+            token_type: 'bearer',
+            user: {
+              id: 'usuario-fake',
+              app_metadata: {},
+              user_metadata: {},
+              aud: 'authenticated',
+              created_at: new Date().toISOString(),
+              email: 'sonda@teste.com',
+            },
+          },
+        },
+      }),
+      onAuthStateChange: vi.fn().mockReturnValue({
+        data: { subscription: { unsubscribe: vi.fn() } },
+      }),
+      signOut: vi.fn(),
+    },
+  },
+}))
+
+import App from '@/App'
 
 /**
  * useTema e a unica peca impura do app: toca localStorage, matchMedia e document.
@@ -24,34 +57,34 @@ afterEach(() => {
 })
 
 describe('useTema (integracao com o DOM)', () => {
-  it('clicar no botao poe a classe dark no <html> e salva "escuro" no localStorage', () => {
+  it('clicar no botao poe a classe dark no <html> e salva "escuro" no localStorage', async () => {
     render(<App />)
 
     expect(document.documentElement).not.toHaveClass('dark')
 
-    fireEvent.click(screen.getByRole('button', { name: 'Ativar tema escuro' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Ativar tema escuro' }))
 
     expect(document.documentElement).toHaveClass('dark')
     expect(localStorage.getItem(CHAVE_TEMA)).toBe('escuro')
   })
 
-  it('clicar de novo volta ao tema claro e tira a classe dark', () => {
+  it('clicar de novo volta ao tema claro e tira a classe dark', async () => {
     render(<App />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Ativar tema escuro' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Ativar tema escuro' }))
     fireEvent.click(screen.getByRole('button', { name: 'Ativar tema claro' }))
 
     expect(document.documentElement).not.toHaveClass('dark')
     expect(localStorage.getItem(CHAVE_TEMA)).toBe('claro')
   })
 
-  it('respeita o tema escuro ja salvo no localStorage, sem precisar de clique', () => {
+  it('respeita o tema escuro ja salvo no localStorage, sem precisar de clique', async () => {
     localStorage.setItem(CHAVE_TEMA, 'escuro')
 
     render(<App />)
 
     expect(document.documentElement).toHaveClass('dark')
-    expect(screen.getByRole('button', { name: 'Ativar tema claro' })).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: 'Ativar tema claro' })).toBeInTheDocument()
   })
 
   it('adota o tema escuro quando o SISTEMA prefere escuro e nada foi salvo', () => {
@@ -64,7 +97,7 @@ describe('useTema (integracao com o DOM)', () => {
 })
 
 describe('useTema com o navegador hostil', () => {
-  it('nao derruba o app quando o localStorage LANCA (Safari privado, webview de app)', () => {
+  it('nao derruba o app quando o localStorage LANCA (Safari privado, webview de app)', async () => {
     // E o cenario do nosso usuario: ele abre o link pelo WhatsApp. Se isso
     // estourar durante o render, o React desmonta a arvore e ele ve tela branca.
     vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
@@ -77,21 +110,21 @@ describe('useTema com o navegador hostil', () => {
     render(<App />)
 
     // O app abre normalmente, no tema claro, so sem persistir a escolha.
-    expect(screen.getByText('Autchronos')).toBeInTheDocument()
+    expect(await screen.findByText('Autchronos')).toBeInTheDocument()
     expect(() =>
       fireEvent.click(screen.getByRole('button', { name: 'Ativar tema escuro' })),
     ).not.toThrow()
     expect(document.documentElement).toHaveClass('dark')
   })
 
-  it('nao derruba o app quando o matchMedia LANCA', () => {
+  it('nao derruba o app quando o matchMedia LANCA', async () => {
     vi.spyOn(window, 'matchMedia').mockImplementation(() => {
       throw new Error('matchMedia indisponivel')
     })
 
     render(<App />)
 
-    expect(screen.getByText('Autchronos')).toBeInTheDocument()
+    expect(await screen.findByText('Autchronos')).toBeInTheDocument()
   })
 })
 

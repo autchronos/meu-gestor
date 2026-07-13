@@ -1,37 +1,56 @@
 import { BotaoTema } from '@/components/BotaoTema'
 import { TemaProvider } from '@/hooks/TemaProvider'
+import { SessaoProvider } from '@/hooks/SessaoProvider'
+import { useSessao } from '@/hooks/sessaoContexto'
+import { Auth } from '@/modules/auth/Auth'
+import { supabase } from '@/lib/supabase'
+
+function Conteudo() {
+  const { sessao, carregando } = useSessao()
+
+  // Sem isto, quem ja esta logado ve a tela de login piscar a cada recarga.
+  if (carregando) {
+    return <div className="min-h-dvh bg-fundo" />
+  }
+
+  if (!sessao) {
+    return <Auth />
+  }
+
+  return (
+    <div className="min-h-dvh bg-fundo text-texto">
+      <header className="flex items-center justify-between border-b border-marca/15 px-5 py-4">
+        <div>
+          <h1 className="font-display text-xl font-bold text-marca">Autchronos</h1>
+          <p className="text-sm opacity-70">{sessao.user.email}</p>
+        </div>
+        <div className="flex gap-2">
+          <BotaoTema />
+          <button
+            type="button"
+            onClick={() => supabase.auth.signOut()}
+            className="rounded-lg border border-marca/20 px-3 py-2 text-sm text-marca"
+          >
+            Sair
+          </button>
+        </div>
+      </header>
+
+      <main className="p-5">
+        <p className="opacity-70">
+          Conta criada. O onboarding e o catalogo chegam na Fase 2.
+        </p>
+      </main>
+    </div>
+  )
+}
 
 function App() {
   return (
     <TemaProvider>
-      <div className="min-h-dvh bg-fundo text-texto">
-        <header className="flex items-center justify-between border-b border-marca/15 px-5 py-4">
-          <div>
-            <h1 className="font-display text-xl font-bold text-marca">Autchronos</h1>
-            <p className="text-sm opacity-70">
-              Gestão financeira e fluxo de caixa para empreendedores
-            </p>
-          </div>
-          <BotaoTema />
-        </header>
-
-        <main className="grid gap-4 p-5 sm:grid-cols-2">
-          <article className="rounded-xl border border-marca/10 bg-superficie p-4">
-            <h2 className="font-display text-sm uppercase tracking-wide opacity-60">Entradas</h2>
-            <p className="font-display text-2xl font-bold text-entrada">R$ 340,00</p>
-          </article>
-
-          <article className="rounded-xl border border-marca/10 bg-superficie p-4">
-            <h2 className="font-display text-sm uppercase tracking-wide opacity-60">Saídas</h2>
-            <p className="font-display text-2xl font-bold text-saida">R$ 120,00</p>
-          </article>
-
-          <article className="rounded-xl border border-marca/10 bg-superficie p-4 sm:col-span-2">
-            <h2 className="font-display text-sm uppercase tracking-wide opacity-60">Meta do mês</h2>
-            <p className="font-display text-2xl font-bold text-meta-texto">Meta atingida</p>
-          </article>
-        </main>
-      </div>
+      <SessaoProvider>
+        <Conteudo />
+      </SessaoProvider>
     </TemaProvider>
   )
 }

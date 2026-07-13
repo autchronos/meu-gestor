@@ -7,7 +7,11 @@
     "target": "es2023",
     "lib": ["ES2023", "DOM"],
     "module": "esnext",
-    "types": ["node"],
+    /* "vite/client" e necessario aqui porque os testes importam App -> ... ->
+       src/lib/supabase.ts, que usa import.meta.env. Sem isto, o type-check
+       deste projeto (que nao inclui src/vite-env.d.ts) nao ve o augment de
+       ImportMeta que o vite/client fornece. */
+    "types": ["node", "vite/client"],
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
     "paths": {
