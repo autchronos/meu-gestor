@@ -48,31 +48,62 @@ negócio pela tabela `negocio_telefones`.
 
 **Mapeamento pedido → schema existente:**
 
-| Pedido do usuário            | No schema             |
-|------------------------------|-----------------------|
-| lançamentos (entrada/saída)  | `lancamentos`         |
-| categorias padrão + custom   | `categorias`          |
+| Pedido do usuário            | No schema                      |
+|------------------------------|--------------------------------|
+| lançamentos (entrada/saída)  | `lancamentos`                  |
+| categorias padrão + custom   | `categorias`                   |
+| a receber (fiado/cartão)     | `receber` (+ trigger → caixa)  |
+| clientes (fiado/parceiros)   | `clientes`                     |
 | estoque / itens              | `itens` (+ `lancamento_itens`) |
-| nicho no onboarding          | `negocios.ramo`       |
-| conexão de WhatsApp          | `negocio_telefones`   |
-| log de mensagens             | (tabela nova na Fase 5) |
+| locação (item sai e volta)   | `locacoes`                     |
+| metas                        | `metas`                        |
+| nicho no onboarding          | `negocios.ramo`                |
+| conexão de WhatsApp          | `negocio_telefones`            |
+| log de mensagens             | (tabela nova na Fase 6)        |
 
 Nichos do onboarding → `ramo`: Vendas de produtos → `revenda`; Alimentação →
 `alimentacao`; Aluguéis → `locacao`; Serviços → `servicos`; Outro → `outro`
 (o schema também aceita `beleza`).
 
+**Deltas de schema para os requisitos novos (a resolver no *brainstorming* da
+Fase 2/3/4, registrados aqui para não se perderem):**
+
+- **Carteira PF/PJ (3.1):** `lancamentos.carteira` (`'empresa' | 'pessoal'`,
+  default `'empresa'`) e um tipo/marcador de **retirada** (dinheiro Empresa →
+  Pessoal, que **não** conta como despesa). Provável extensão do CHECK de `tipo`
+  ou um campo `eh_retirada`.
+- **Pró-labore (3.1):** limite mensal de retirada no perfil/negócio (ex.
+  `metas.limite_prolabore` ou coluna em `negocios`). Card e alerta derivam disso.
+- **A receber + cartão (3.2):** `receber` ganha `vencimento` (já existe),
+  `forma_pagamento` e `taxa` (percentual) para calcular o **valor líquido** que
+  entra no caixa. "Disponível hoje" = soma de `lancamentos`; "A receber" = soma
+  de `receber` com `pago = false`.
+- **Metas e reserva (3.3):** `metas` ganha `reserva_alvo`, `reserva_prazo`,
+  `valor_reservado` e `saldo_minimo` (para o alerta). Reservado sai do "saldo
+  disponível para gastar".
+
+Nenhum desses deltas é da Fase 1 — ficam anotados para as fases de domínio.
+
 **Ordem de construção (cada fase é mostrada rodando antes da próxima):**
 
 1. **Setup + Landing + PWA** — sem banco, sem login.
 2. **Auth + onboarding + banco** — Supabase Auth (e-mail/senha + Google), aplica
-   as migrations, onboarding em etapas com templates de ramo.
-3. **Dashboard financeiro** — visão geral, lançamentos (CRUD), categorias,
-   relatórios (CSV), gráfico de fluxo de caixa. Mobile-first, denso como extrato.
-4. **Controle de estoque** — CRUD de itens, estoque mínimo com alerta, baixa
+   as migrations (com os deltas acima), onboarding em etapas com templates de ramo.
+3. **Dashboard financeiro + carteiras PF/PJ e retiradas** — visão geral com os
+   **dois saldos** ("Disponível hoje" e "A receber"), lançamentos (CRUD),
+   categorias, relatórios (CSV), gráfico de fluxo de caixa; carteira
+   Empresa/Pessoal, tela de retiradas e limite de pró-labore. Mobile-first, denso
+   como extrato.
+4. **Contas a receber + metas e reserva** — entrada à vista vs. a receber, tela
+   "A receber" (vencidos em destaque), taxas de cartão (valor líquido), projeção
+   de 30 dias; metas de reserva com barra, valor reservado e alerta de saldo
+   mínimo.
+5. **Controle de estoque** — CRUD de itens, estoque mínimo com alerta, baixa
    automática na venda, adaptação por nicho (incl. locação disponível/alugado).
-5. **WhatsApp** — Evolution API → webhook → parser (regex primeiro, modo
-   opcional Anthropic) → cria lançamento → responde no WhatsApp. Comandos
-   "saldo" e "resumo". Página de conexão com QR code.
+6. **WhatsApp** — Evolution API → webhook → parser (regex primeiro, modo
+   opcional Anthropic) → cria lançamento → responde no WhatsApp. Entende venda,
+   despesa, fiado ("vendi 300 fiado pro João") e retirada ("tirei 200 pra mim").
+   Comandos "saldo" e "resumo". Página de conexão com QR code.
 
 ---
 
