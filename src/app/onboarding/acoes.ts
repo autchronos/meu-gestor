@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { nichoParaRamo } from "@/lib/auth/roteamento";
 import { templateDoRamo } from "@/templates/ramos";
+import { normalizarTelefone } from "@/lib/telefone";
 
 export interface DadosOnboarding {
   nomeNegocio: string;
@@ -46,7 +47,7 @@ export async function criarNegocioCompleto(dados: DadosOnboarding) {
   if (dados.whatsapp.trim()) {
     const { error } = await supabase.from("negocio_telefones").insert({
       negocio_id: negocioId,
-      telefone: dados.whatsapp.trim(),
+      telefone: normalizarTelefone(dados.whatsapp),
     });
     if (error) {
       problemas.push("o número de WhatsApp (pode já estar vinculado a outro negócio)");

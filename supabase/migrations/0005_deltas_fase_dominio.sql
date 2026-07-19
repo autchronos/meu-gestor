@@ -6,27 +6,29 @@
 
 -- ---------- lancamentos: carteira e retirada ----------
 ALTER TABLE lancamentos
-  ADD COLUMN carteira TEXT NOT NULL DEFAULT 'empresa'
+  ADD COLUMN IF NOT EXISTS carteira TEXT NOT NULL DEFAULT 'empresa'
     CHECK (carteira IN ('empresa','pessoal')),
-  ADD COLUMN eh_retirada BOOLEAN NOT NULL DEFAULT false;
+  ADD COLUMN IF NOT EXISTS eh_retirada BOOLEAN NOT NULL DEFAULT false;
 
 -- Retirada = tipo='saida', carteira='empresa', eh_retirada=true (nao e despesa
 -- do negocio). Indice para a tela "Minhas retiradas".
-CREATE INDEX idx_lancamentos_retiradas
+CREATE INDEX IF NOT EXISTS idx_lancamentos_retiradas
   ON lancamentos (negocio_id, data DESC) WHERE eh_retirada;
 
 -- ---------- metas: pro-labore e reserva ----------
 ALTER TABLE metas
-  ADD COLUMN limite_prolabore NUMERIC(10,2) NOT NULL DEFAULT 0,
-  ADD COLUMN reserva_alvo     NUMERIC(10,2) NOT NULL DEFAULT 0,
-  ADD COLUMN reserva_prazo    DATE,
-  ADD COLUMN valor_reservado  NUMERIC(10,2) NOT NULL DEFAULT 0,
-  ADD COLUMN saldo_minimo     NUMERIC(10,2) NOT NULL DEFAULT 0;
+  ADD COLUMN IF NOT EXISTS limite_prolabore NUMERIC(10,2) NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS reserva_alvo     NUMERIC(10,2) NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS reserva_prazo    DATE,
+  ADD COLUMN IF NOT EXISTS valor_reservado  NUMERIC(10,2) NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS saldo_minimo     NUMERIC(10,2) NOT NULL DEFAULT 0;
 
 -- ---------- receber: forma de pagamento e taxa ----------
+-- taxa em % (0..100): acima de 100 o trigger lancaria um liquido negativo.
 ALTER TABLE receber
-  ADD COLUMN forma_pagamento TEXT,
-  ADD COLUMN taxa            NUMERIC(5,2) NOT NULL DEFAULT 0;
+  ADD COLUMN IF NOT EXISTS forma_pagamento TEXT,
+  ADD COLUMN IF NOT EXISTS taxa            NUMERIC(5,2) NOT NULL DEFAULT 0
+    CHECK (taxa >= 0 AND taxa <= 100);
 
 -- ---------- trigger: lancar o LIQUIDO (descontada a taxa) ----------
 -- Substitui a versao do 0003. Mantem idempotencia e o fuso America/Sao_Paulo.
