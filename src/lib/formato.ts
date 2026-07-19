@@ -6,5 +6,5 @@ export function formatarBRL(valor: number): string {
     currency: "BRL",
   })
     .format(valor)
-    .replace(/ /g, " ");
+    .replace(/\u00A0/g, " ");
 }
