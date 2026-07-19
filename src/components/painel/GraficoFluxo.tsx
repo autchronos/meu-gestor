@@ -25,7 +25,7 @@ export function GraficoFluxo({ serie, liquido }: { serie: PontoES[]; liquido: nu
         <div className="mt-3 flex items-center justify-between border-t border-borda px-2 pt-3 text-xs">
           <span className="flex items-center gap-1.5 text-texto-suave"><span className="h-2 w-2 bg-entrada" /> Entradas</span>
           <span className="flex items-center gap-1.5 text-texto-suave"><span className="h-2 w-2 bg-saida" /> Saídas</span>
-          <span className="tabular-nums text-marca">Líquido: <span className="font-semibold">{formatarBRL(liquido)}</span></span>
+          <span className="tabular-nums text-texto-suave">Líquido: <span className={`font-semibold ${liquido >= 0 ? "text-entrada" : "text-saida"}`}>{formatarBRL(liquido)}</span></span>
         </div>
       </div>
     </div>

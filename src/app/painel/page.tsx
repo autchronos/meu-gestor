@@ -15,6 +15,8 @@ export default async function Painel() {
   const { data: resumo } = await supabase.rpc("resumo_dashboard", { p_negocio_id: negocio.id });
   const r = resumo ?? { disponivel: 0, a_receber: 0, entradas_mes: 0, saidas_mes: 0, retirado_mes: 0, limite_prolabore: 0 };
 
+  // Fuso America/Sao_Paulo: o servidor roda em UTC; hojeSP() garante que a janela
+  // de 30 dias e o "hoje" da série batam com o dia local do usuário.
   const hojeStr = hojeSP();
   const [y, m, d] = hojeStr.split("-").map(Number);
   const de = new Date(Date.UTC(y, m - 1, d - 29)).toISOString().slice(0, 10);
