@@ -71,6 +71,17 @@ const { data: lanc } = await sb
   .single();
 assert(Number(lanc.valor) === 90, `trigger lancou liquido 90 (veio ${lanc?.valor})`);
 
+// 3) flags de capacidade existem em negocios (defaults carteiras/metas = true)
+const { data: negFlags, error: eFlags } = await sb
+  .from("negocios")
+  .select("usa_estoque, usa_fiado, usa_locacao, usa_carteiras, usa_metas")
+  .eq("id", neg.id)
+  .single();
+assert(
+  !eFlags && negFlags.usa_carteiras === true && negFlags.usa_metas === true && negFlags.usa_estoque === false,
+  "negocios tem as flags usa_* com defaults corretos",
+);
+
 // limpeza (cascata por negocio_id)
 await sb.from("negocios").delete().eq("id", neg.id);
 console.log("VERIFICACAO OK");
