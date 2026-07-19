@@ -21,7 +21,7 @@ export function Header() {
           <ToggleTema />
           <Link
             href="/entrar"
-            className="rounded-md bg-marca px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            className="bg-marca px-4 py-2 text-sm font-semibold uppercase tracking-wider text-white transition-opacity hover:opacity-90"
           >
             Entrar / Cadastrar
           </Link>

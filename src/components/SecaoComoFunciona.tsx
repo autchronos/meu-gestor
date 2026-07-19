@@ -11,8 +11,8 @@ export function SecaoComoFunciona() {
         <h2 className="font-serif text-3xl font-bold text-marca">Como funciona</h2>
         <ol className="mt-8 grid gap-6 md:grid-cols-3">
           {PASSOS.map((p) => (
-            <li key={p.n} className="rounded-lg border border-borda bg-superficie p-6">
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-marca font-serif text-lg font-bold text-dourado">
+            <li key={p.n} className="border border-borda bg-superficie p-6">
+              <span className="flex h-10 w-10 items-center justify-center bg-marca font-serif text-lg font-bold text-dourado">
                 {p.n}
               </span>
               <h3 className="mt-4 text-lg font-semibold text-texto">{p.titulo}</h3>

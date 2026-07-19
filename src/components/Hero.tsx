@@ -19,7 +19,7 @@ export function Hero() {
         <div className="mt-8 flex flex-wrap items-center gap-4">
           <Link
             href="/entrar"
-            className="rounded-md bg-marca px-6 py-3 font-semibold text-white transition-opacity hover:opacity-90"
+            className="bg-marca px-6 py-3 font-semibold uppercase tracking-wider text-white transition-opacity hover:opacity-90"
           >
             Entrar / Cadastrar
           </Link>
@@ -35,9 +35,9 @@ export function Hero() {
 
 function MockupApp() {
   return (
-    <div className="overflow-hidden rounded-xl border border-borda bg-superficie shadow-sm">
+    <div className="overflow-hidden border border-borda bg-superficie">
       <div className="bg-marca p-5 text-white">
-        <p className="text-sm opacity-80">Saldo em caixa</p>
+        <p className="text-sm text-white/70">Saldo em caixa</p>
         <p className="font-serif text-3xl font-bold text-dourado">
           {formatarBRL(4235.9)}
         </p>

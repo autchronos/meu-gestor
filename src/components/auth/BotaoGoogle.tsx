@@ -28,7 +28,7 @@ export function BotaoGoogle() {
         type="button"
         onClick={entrarComGoogle}
         disabled={carregando}
-        className="w-full rounded-md border border-borda bg-superficie px-4 py-2 font-medium text-texto transition-colors hover:bg-fundo disabled:opacity-60"
+        className="w-full border border-borda bg-superficie px-4 py-2 font-medium text-texto transition-colors hover:bg-fundo disabled:opacity-60"
       >
         {carregando ? "Redirecionando..." : "Entrar com Google"}
       </button>

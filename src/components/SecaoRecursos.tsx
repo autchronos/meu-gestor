@@ -28,7 +28,7 @@ export function SecaoRecursos() {
         <h2 className="font-serif text-3xl font-bold text-marca">Recursos</h2>
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {RECURSOS.map((r) => (
-            <div key={r.titulo} className="rounded-lg border border-borda p-6">
+            <div key={r.titulo} className="border border-borda bg-superficie p-6">
               <h3 className="text-lg font-semibold text-texto">{r.titulo}</h3>
               <p className="mt-2 text-texto-suave">{r.texto}</p>
             </div>

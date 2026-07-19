@@ -23,7 +23,7 @@ export default async function Onboarding() {
         <h1 className="font-serif text-2xl font-bold text-marca">Bem-vindo!</h1>
         <p className="mt-1 text-sm text-texto-suave">Vamos configurar seu negócio.</p>
       </div>
-      <div className="rounded-xl border border-borda bg-superficie p-6 shadow-sm">
+      <div className="border border-borda bg-superficie p-6">
         <Wizard />
       </div>
     </main>

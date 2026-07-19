@@ -45,8 +45,8 @@ export function Wizard() {
     });
   }
 
-  const campo = "w-full rounded-md border border-borda bg-superficie px-3 py-2 text-texto";
-  const botao = "rounded-md bg-marca px-4 py-2 font-semibold text-white hover:opacity-90 disabled:opacity-60";
+  const campo = "w-full border border-borda bg-superficie px-3 py-2 text-texto";
+  const botao = "bg-marca px-4 py-2 font-semibold uppercase tracking-wider text-white hover:opacity-90 disabled:opacity-60";
   const ULTIMA = 4;
 
   return (
@@ -73,7 +73,7 @@ export function Wizard() {
         <fieldset className="flex flex-col gap-3">
           <legend className="text-sm text-texto-suave">O que seu negócio usa? (pode ajustar depois)</legend>
           {CAPACIDADES.map((c) => (
-            <label key={c.chave} className="flex items-start gap-3 rounded-md border border-borda p-3 text-sm">
+            <label key={c.chave} className="flex items-start gap-3 border border-borda bg-superficie p-3 text-sm">
               <input
                 type="checkbox"
                 checked={flags[c.chave]}
@@ -107,7 +107,7 @@ export function Wizard() {
 
       <div className="flex justify-between">
         <button type="button" onClick={() => setEtapa((e) => Math.max(0, e - 1))} disabled={etapa === 0 || pendente}
-          className="rounded-md border border-borda px-4 py-2 text-texto-suave disabled:opacity-40">
+          className="border border-borda px-4 py-2 text-texto-suave disabled:opacity-40">
           Voltar
         </button>
         {etapa < ULTIMA ? (

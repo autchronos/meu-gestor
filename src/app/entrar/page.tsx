@@ -18,11 +18,11 @@ export default function Entrar({
         <p className="mt-1 text-sm text-texto-suave">Meu Gestor Financeiro</p>
       </div>
 
-      <div className="rounded-xl border border-borda bg-superficie p-6 shadow-sm">
+      <div className="border border-borda bg-superficie p-6">
         {erro && (
           <p
             role="alert"
-            className="mb-4 rounded-md border border-borda px-3 py-2 text-sm text-saida"
+            className="mb-4 border border-borda px-3 py-2 text-sm text-saida"
           >
             {erro}
           </p>

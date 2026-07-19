@@ -65,18 +65,18 @@ export function FormularioAcesso() {
 
   return (
     <form onSubmit={enviar} className="flex flex-col gap-4">
-      <div className="flex rounded-md border border-borda p-1 text-sm">
+      <div className="flex border border-borda p-1 text-sm">
         <button
           type="button"
           onClick={() => setModo("entrar")}
-          className={`flex-1 rounded px-3 py-1.5 ${modo === "entrar" ? "bg-marca text-white" : "text-texto-suave"}`}
+          className={`flex-1 px-3 py-1.5 ${modo === "entrar" ? "bg-marca text-white" : "text-texto-suave"}`}
         >
           Entrar
         </button>
         <button
           type="button"
           onClick={() => setModo("cadastrar")}
-          className={`flex-1 rounded px-3 py-1.5 ${modo === "cadastrar" ? "bg-marca text-white" : "text-texto-suave"}`}
+          className={`flex-1 px-3 py-1.5 ${modo === "cadastrar" ? "bg-marca text-white" : "text-texto-suave"}`}
         >
           Criar conta
         </button>
@@ -88,7 +88,7 @@ export function FormularioAcesso() {
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="rounded-md border border-borda bg-superficie px-3 py-2 text-texto"
+          className="border border-borda bg-superficie px-3 py-2 text-texto"
           autoComplete="email"
         />
       </label>
@@ -100,7 +100,7 @@ export function FormularioAcesso() {
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
           minLength={6}
-          className="rounded-md border border-borda bg-superficie px-3 py-2 text-texto"
+          className="border border-borda bg-superficie px-3 py-2 text-texto"
           autoComplete={modo === "entrar" ? "current-password" : "new-password"}
         />
       </label>
@@ -111,7 +111,7 @@ export function FormularioAcesso() {
       <button
         type="submit"
         disabled={carregando}
-        className="rounded-md bg-marca px-4 py-2 font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
+        className="bg-marca px-4 py-2 font-semibold uppercase tracking-wider text-white transition-opacity hover:opacity-90 disabled:opacity-60"
       >
         {carregando ? "Aguarde..." : modo === "entrar" ? "Entrar" : "Criar conta"}
       </button>

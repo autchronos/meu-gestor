@@ -25,7 +25,7 @@ export function BotaoInstalar() {
       <button
         type="button"
         onClick={aoClicar}
-        className="rounded-md border-2 border-dourado px-5 py-3 font-semibold text-marca transition-colors hover:bg-dourado/10 dark:text-texto"
+        className="border-2 border-dourado px-5 py-3 font-semibold uppercase tracking-wider text-marca transition-colors hover:bg-dourado hover:text-marca dark:text-texto"
       >
         📲 Baixar no celular
       </button>
