@@ -37,6 +37,12 @@ assert(Number(resumo.disponivel) === 200, `disponivel = 300 - 100(retirada) = 20
 assert(Number(resumo.entradas_mes) === 300, `entradas_mes = 300 (veio ${resumo?.entradas_mes})`);
 assert(Number(resumo.saidas_mes) === 0, `saidas_mes ignora a retirada (veio ${resumo?.saidas_mes})`);
 
+// Fase 3B: retirado_mes reflete a retirada (100); apos definir limite, retorna 300.
+assert(Number(resumo.retirado_mes) === 100, `retirado_mes = 100 (veio ${resumo?.retirado_mes})`);
+await cli.from("metas").update({ limite_prolabore: 300 }).eq("negocio_id", negId);
+const { data: resumo2 } = await cli.rpc("resumo_dashboard", { p_negocio_id: negId });
+assert(Number(resumo2.limite_prolabore) === 300, `limite_prolabore = 300 (veio ${resumo2?.limite_prolabore})`);
+
 await admin.from("negocios").delete().eq("id", negId);
 await admin.auth.admin.deleteUser(u.user.id);
 console.log("RESUMO OK");

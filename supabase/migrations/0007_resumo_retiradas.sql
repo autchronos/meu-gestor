@@ -1,0 +1,37 @@
+-- ============================================================
+-- Estende resumo_dashboard com retirado_mes + limite_prolabore (Fase 3B).
+-- ============================================================
+CREATE OR REPLACE FUNCTION resumo_dashboard(p_negocio_id UUID)
+RETURNS JSONB AS $$
+DECLARE
+  v_hoje    DATE := (now() AT TIME ZONE 'America/Sao_Paulo')::date;
+  v_ini_mes DATE := date_trunc('month', (now() AT TIME ZONE 'America/Sao_Paulo'))::date;
+BEGIN
+  IF NOT e_membro(p_negocio_id) THEN
+    RAISE EXCEPTION 'acesso negado';
+  END IF;
+
+  RETURN jsonb_build_object(
+    'disponivel', COALESCE((
+      SELECT SUM(CASE WHEN tipo = 'entrada' THEN valor ELSE -valor END)
+      FROM lancamentos WHERE negocio_id = p_negocio_id AND carteira = 'empresa'), 0),
+    'a_receber', COALESCE((
+      SELECT SUM(valor) FROM receber
+      WHERE negocio_id = p_negocio_id AND NOT pago), 0),
+    'entradas_mes', COALESCE((
+      SELECT SUM(valor) FROM lancamentos
+      WHERE negocio_id = p_negocio_id AND carteira = 'empresa'
+        AND tipo = 'entrada' AND data >= v_ini_mes AND data <= v_hoje), 0),
+    'saidas_mes', COALESCE((
+      SELECT SUM(valor) FROM lancamentos
+      WHERE negocio_id = p_negocio_id AND carteira = 'empresa'
+        AND tipo = 'saida' AND NOT eh_retirada AND data >= v_ini_mes AND data <= v_hoje), 0),
+    'retirado_mes', COALESCE((
+      SELECT SUM(valor) FROM lancamentos
+      WHERE negocio_id = p_negocio_id AND carteira = 'empresa'
+        AND eh_retirada AND data >= v_ini_mes AND data <= v_hoje), 0),
+    'limite_prolabore', COALESCE((
+      SELECT limite_prolabore FROM metas WHERE negocio_id = p_negocio_id), 0)
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER STABLE SET search_path = public;
