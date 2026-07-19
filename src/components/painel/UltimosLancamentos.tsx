@@ -19,7 +19,7 @@ export function UltimosLancamentos({ itens }: { itens: Item[] }) {
       <ul>
         {itens.map((l, idx) => (
           <li key={l.id} className={`flex items-center gap-3 px-5 py-3 ${idx !== itens.length - 1 ? "border-b border-borda" : ""}`}>
-            <div className={`grid h-8 w-8 shrink-0 place-items-center border ${l.tipo === "entrada" ? "border-entrada/30 text-entrada" : "border-saida/30 text-saida"}`}>
+            <div className={`grid h-8 w-8 shrink-0 place-items-center border ${l.tipo === "entrada" ? "border-entrada text-entrada" : "border-saida text-saida"}`}>
               {l.tipo === "entrada" ? <ArrowDownLeft className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
             </div>
             <div className="min-w-0 flex-1">
