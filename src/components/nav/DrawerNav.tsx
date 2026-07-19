@@ -33,6 +33,7 @@ export function DrawerNav({ usaCarteiras, nome }: { usaCarteiras: boolean; nome:
                 const ativo = ehAtivo(path, i.href);
                 return (
                   <Link key={i.href} href={i.href} onClick={() => setAberto(false)}
+                    aria-current={ativo ? "page" : undefined}
                     className={`flex items-center gap-3 px-5 py-3 text-sm uppercase tracking-wider ${ativo ? "text-dourado" : "text-white/70"}`}>
                     <i.Icone className="h-4 w-4" /> {i.rotulo}
                   </Link>
