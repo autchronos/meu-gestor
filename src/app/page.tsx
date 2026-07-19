@@ -1,7 +1,19 @@
+import { Header } from "@/components/Header";
+import { Hero } from "@/components/Hero";
+import { SecaoRecursos } from "@/components/SecaoRecursos";
+import { SecaoComoFunciona } from "@/components/SecaoComoFunciona";
+import { Footer } from "@/components/Footer";
+
 export default function Home() {
   return (
-    <main className="p-8">
-      <h1 className="font-serif text-2xl font-bold text-marca">Autchronos</h1>
-    </main>
+    <>
+      <Header />
+      <main>
+        <Hero />
+        <SecaoRecursos />
+        <SecaoComoFunciona />
+      </main>
+      <Footer />
+    </>
   );
 }
