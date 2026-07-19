@@ -13,10 +13,12 @@ export default async function Lancamentos({
   const supabase = criarClienteServidor();
   const hojeStr = hojeSP();
 
-  const { data: categorias } = await supabase.from("categorias").select("id, nome, tipo").order("nome");
+  const { data: categorias } = await supabase
+    .from("categorias").select("id, nome, tipo").eq("negocio_id", negocio.id).order("nome");
 
   let q = supabase.from("lancamentos")
     .select("id, tipo, descricao, valor, data, origem, eh_retirada")
+    .eq("negocio_id", negocio.id)
     .order("data", { ascending: false }).order("created_at", { ascending: false }).limit(200);
 
   const range = intervaloPeriodo(searchParams.periodo, hojeStr);

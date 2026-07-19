@@ -20,3 +20,15 @@ test("dia da entrada sobe o saldo, dia da saida desce", () => {
   expect(serie[serie.length - 1].saldo).toBe(40);
   expect(serie[serie.length - 2].saldo).toBe(0); // vespera
 });
+
+test("lançamento com data futura não quebra o invariante (série fecha no disponível)", () => {
+  // disponivel 150 já reflete uma entrada futura de 50; a série (até hoje) deve
+  // terminar em 150 mesmo assim, sem descontar o futuro do meio.
+  const serie = serieFluxoCaixa(
+    [L("2026-07-08", "entrada", 50)],
+    150,
+    new Date("2026-07-03T12:00:00"),
+  );
+  expect(serie[serie.length - 1].saldo).toBe(150);
+  expect(serie).toHaveLength(30);
+});

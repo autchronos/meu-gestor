@@ -29,11 +29,14 @@ export function serieFluxoCaixa(
     dias.push(isoLocal(d));
   }
   const primeiro = dias[0];
+  const ultimo = dias[dias.length - 1];
 
+  // Só o que cai DENTRO da janela (inclui até hoje). Lançamento com data futura
+  // fica de fora da soma e da abertura, senão a série não fecharia no disponível.
   const netPorDia = new Map<string, number>();
   let netPeriodo = 0;
   for (const l of lancamentos) {
-    if (l.data >= primeiro) {
+    if (l.data >= primeiro && l.data <= ultimo) {
       netPorDia.set(l.data, (netPorDia.get(l.data) ?? 0) + delta(l));
       netPeriodo += delta(l);
     }

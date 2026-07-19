@@ -51,7 +51,7 @@ export function FormLancamento({
         <input className={campo} value={descricao} onChange={(e) => setDescricao(e.target.value)} />
       </label>
       <label className="flex flex-col gap-1 text-sm">Data
-        <input type="date" className={campo} value={data} onChange={(e) => setData(e.target.value)} />
+        <input type="date" max={hoje} className={campo} value={data} onChange={(e) => setData(e.target.value)} />
       </label>
 
       {tipoUI !== "retirada" && (

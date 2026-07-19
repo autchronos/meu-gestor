@@ -1,11 +1,14 @@
 import { criarClienteServidor } from "@/lib/supabase/servidor";
+import { negocioAtual } from "@/lib/supabase/negocioAtual";
 import { FormCategoria } from "@/app/painel/categorias/FormCategoria";
 import { excluirCategoria } from "@/app/painel/categorias/acoes";
 
 export default async function Categorias() {
+  const negocio = await negocioAtual();
+  if (!negocio) return null;
   const supabase = criarClienteServidor();
   const { data: categorias } = await supabase
-    .from("categorias").select("id, nome, tipo").order("nome");
+    .from("categorias").select("id, nome, tipo").eq("negocio_id", negocio.id).order("nome");
   const lista = categorias ?? [];
   const entradas = lista.filter((c) => c.tipo === "entrada");
   const saidas = lista.filter((c) => c.tipo === "saida");

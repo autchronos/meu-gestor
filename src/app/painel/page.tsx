@@ -23,9 +23,10 @@ export default async function Painel() {
 
   const { data: lancs30 } = await supabase
     .from("lancamentos").select("data, tipo, valor")
-    .eq("carteira", "empresa").gte("data", de).order("data");
+    .eq("negocio_id", negocio.id).eq("carteira", "empresa").gte("data", de).order("data");
   const { data: ultimos } = await supabase
     .from("lancamentos").select("id, descricao, valor, tipo, data")
+    .eq("negocio_id", negocio.id)
     .order("data", { ascending: false }).order("created_at", { ascending: false }).limit(10);
 
   const serie = serieFluxoCaixa(
