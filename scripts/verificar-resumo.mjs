@@ -22,10 +22,11 @@ const cli = createClient(url, anon, { auth: { persistSession: false } });
 await cli.auth.signInWithPassword({ email, password: "senha123" });
 
 const { data: negId } = await cli.rpc("criar_negocio", { p_nome: "Resumo", p_ramo: "outro" });
-await cli.from("lancamentos").insert([
+const { error: eIns } = await cli.from("lancamentos").insert([
   { negocio_id: negId, tipo: "entrada", descricao: "venda", valor: 300, carteira: "empresa" },
   { negocio_id: negId, tipo: "saida", descricao: "retirada", valor: 100, carteira: "empresa", eh_retirada: true },
 ]);
+assert(!eIns, "inseriu os lancamentos de teste");
 
 const { data: resumo, error } = await cli.rpc("resumo_dashboard", { p_negocio_id: negId });
 assert(!error, "resumo_dashboard executa para o membro");

@@ -32,11 +32,11 @@ BEGIN
     'entradas_mes', COALESCE((
       SELECT SUM(valor) FROM lancamentos
       WHERE negocio_id = p_negocio_id AND carteira = 'empresa'
-        AND tipo = 'entrada' AND data >= v_ini_mes), 0),
+        AND tipo = 'entrada' AND data >= v_ini_mes AND data <= v_hoje), 0),
     'saidas_mes', COALESCE((
       SELECT SUM(valor) FROM lancamentos
       WHERE negocio_id = p_negocio_id AND carteira = 'empresa'
-        AND tipo = 'saida' AND NOT eh_retirada AND data >= v_ini_mes), 0)
+        AND tipo = 'saida' AND NOT eh_retirada AND data >= v_ini_mes AND data <= v_hoje), 0)
   );
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER STABLE SET search_path = public;
