@@ -20,7 +20,7 @@ export default async function Retiradas() {
   const { data: retiradas } = await supabase
     .from("lancamentos")
     .select("id, descricao, valor, data")
-    .eq("negocio_id", negocio.id).eq("eh_retirada", true)
+    .eq("negocio_id", negocio.id).eq("carteira", "empresa").eq("eh_retirada", true)
     .order("data", { ascending: false }).limit(50);
   const lista = (retiradas ?? []).map((r) => ({ ...r, valor: Number(r.valor) }));
 

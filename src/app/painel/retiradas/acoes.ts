@@ -9,6 +9,7 @@ export async function definirLimite(valor: number) {
   if (valor < 0) return { erro: "O limite não pode ser negativo." };
   const negocio = await negocioAtual();
   if (!negocio) return { erro: "Negócio não encontrado." };
+  if (!negocio.usa_carteiras) return { erro: "Retiradas estão desativadas." };
   const supabase = criarClienteServidor();
   const { error } = await supabase.from("metas").update({ limite_prolabore: valor }).eq("negocio_id", negocio.id);
   if (error) return { erro: "Não foi possível salvar o limite." };
