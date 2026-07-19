@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cor-fundo: #F7F8FA;
+  --cor-superficie: #FFFFFF;
+  --cor-borda: #E3E7ED;
+  --cor-texto: #1A2433;
+  --cor-texto-suave: #5A6675;
+  --cor-marca: #0A2540;
+  --cor-dourado: #C9A227;
+  --cor-entrada: #1B7A4B;
+  --cor-saida: #9B2335;
+}
+
+.dark {
+  --cor-fundo: #0A1524;
+  --cor-superficie: #10203A;
+  --cor-borda: #1E3350;
+  --cor-texto: #E6ECF5;
+  --cor-texto-suave: #9FB0C4;
+  --cor-marca: #3E6DA6;
+  --cor-dourado: #D9B84A;
+  --cor-entrada: #3FA76A;
+  --cor-saida: #C85462;
+}
+
+body {
+  background-color: var(--cor-fundo);
+  color: var(--cor-texto);
+}
