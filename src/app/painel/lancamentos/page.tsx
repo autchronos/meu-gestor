@@ -1,17 +1,9 @@
 import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { negocioAtual } from "@/lib/supabase/negocioAtual";
 import { formatarBRL } from "@/lib/formato";
+import { hojeSP, intervaloPeriodo } from "@/lib/caixa/periodo";
 import { FormLancamento } from "@/app/painel/lancamentos/FormLancamento";
 import { excluirLancamento } from "@/app/painel/lancamentos/acoes";
-
-function intervaloPeriodo(periodo: string | undefined, hoje: Date) {
-  const y = hoje.getFullYear(), m = hoje.getMonth();
-  if (periodo === "mes_passado") return { de: new Date(y, m - 1, 1), ate: new Date(y, m, 0) };
-  if (periodo === "ultimos_30") return { de: new Date(y, m, hoje.getDate() - 29), ate: hoje };
-  if (periodo === "tudo") return null;
-  return { de: new Date(y, m, 1), ate: new Date(y, m + 1, 0) }; // mes atual (default)
-}
-const iso = (d: Date) => d.toISOString().slice(0, 10);
 
 export default async function Lancamentos({
   searchParams,
@@ -19,7 +11,7 @@ export default async function Lancamentos({
   const negocio = await negocioAtual();
   if (!negocio) return null;
   const supabase = criarClienteServidor();
-  const hojeStr = new Date().toISOString().slice(0, 10);
+  const hojeStr = hojeSP();
 
   const { data: categorias } = await supabase.from("categorias").select("id, nome, tipo").order("nome");
 
@@ -27,8 +19,8 @@ export default async function Lancamentos({
     .select("id, tipo, descricao, valor, data, origem, eh_retirada")
     .order("data", { ascending: false }).order("created_at", { ascending: false }).limit(200);
 
-  const range = intervaloPeriodo(searchParams.periodo, new Date());
-  if (range) q = q.gte("data", iso(range.de)).lte("data", iso(range.ate));
+  const range = intervaloPeriodo(searchParams.periodo, hojeStr);
+  if (range) q = q.gte("data", range.de).lte("data", range.ate);
   if (searchParams.tipo === "entrada" || searchParams.tipo === "saida") q = q.eq("tipo", searchParams.tipo);
   if (searchParams.origem === "app" || searchParams.origem === "whatsapp") q = q.eq("origem", searchParams.origem);
 

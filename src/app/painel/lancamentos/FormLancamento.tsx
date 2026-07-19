@@ -37,7 +37,7 @@ export function FormLancamento({
     <div className="flex flex-col gap-3">
       <div className="flex gap-2">
         {(["entrada", "saida", ...(usaCarteiras ? ["retirada"] as const : [])] as TipoUI[]).map((t) => (
-          <button key={t} type="button" onClick={() => setTipoUI(t)}
+          <button key={t} type="button" onClick={() => { setTipoUI(t); setCategoriaId(""); }}
             className={`flex-1 rounded-md border px-2 py-2 text-sm capitalize ${tipoUI === t ? "border-marca bg-marca text-white" : "border-borda text-texto-suave"}`}>
             {t}
           </button>
