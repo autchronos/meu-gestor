@@ -1,6 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import { criarNegocioCompleto } from "@/app/onboarding/acoes";
+import { parseValorBRL } from "@/lib/formato";
 
 const NICHOS = ["Vendas de produtos", "Alimentação", "Aluguéis", "Serviços", "Outro"];
 
@@ -29,7 +30,7 @@ export function Wizard() {
         nomeNegocio: nomeNegocio.trim(),
         nicho,
         whatsapp,
-        saldoInicial: Number(saldoInicial.replace(",", ".")) || 0,
+        saldoInicial: parseValorBRL(saldoInicial),
       });
       if (r?.erro) setErro(r.erro);
     });

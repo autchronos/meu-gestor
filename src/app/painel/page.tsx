@@ -2,7 +2,11 @@ import { redirect } from "next/navigation";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { sair } from "@/app/painel/acoes";
 
-export default async function Painel() {
+export default async function Painel({
+  searchParams,
+}: {
+  searchParams: { aviso?: string };
+}) {
   const supabase = criarClienteServidor();
   const {
     data: { user },
@@ -18,6 +22,8 @@ export default async function Painel() {
   // Sem negócio ainda -> onboarding.
   if (!negocio) redirect("/onboarding");
 
+  const aviso = searchParams?.aviso;
+
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-4 py-10">
       <header className="flex items-center justify-between border-b border-borda pb-4">
@@ -31,6 +37,15 @@ export default async function Painel() {
           </button>
         </form>
       </header>
+
+      {aviso && (
+        <p
+          role="status"
+          className="rounded-md border border-borda px-4 py-3 text-sm text-saida"
+        >
+          {aviso}
+        </p>
+      )}
       <div className="rounded-xl border border-borda bg-superficie p-6">
         <p className="text-texto">
           Conta e negócio configurados. O painel financeiro completo chega na Fase 3.
