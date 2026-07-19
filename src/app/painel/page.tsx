@@ -3,6 +3,7 @@ import { negocioAtual } from "@/lib/supabase/negocioAtual";
 import { hojeSP } from "@/lib/caixa/periodo";
 import { serieFluxoCaixa } from "@/lib/caixa/fluxo";
 import { CardsSaldo } from "@/components/painel/CardsSaldo";
+import { CardProLabore } from "@/components/painel/CardProLabore";
 import { GraficoFluxo } from "@/components/painel/GraficoFluxo";
 import { UltimosLancamentos } from "@/components/painel/UltimosLancamentos";
 
@@ -12,7 +13,7 @@ export default async function Painel() {
   const supabase = criarClienteServidor();
 
   const { data: resumo } = await supabase.rpc("resumo_dashboard", { p_negocio_id: negocio.id });
-  const r = resumo ?? { disponivel: 0, a_receber: 0, entradas_mes: 0, saidas_mes: 0 };
+  const r = resumo ?? { disponivel: 0, a_receber: 0, entradas_mes: 0, saidas_mes: 0, retirado_mes: 0, limite_prolabore: 0 };
 
   // Fuso America/Sao_Paulo: o servidor roda em UTC, entao usamos hojeSP() para
   // que a janela de 30 dias e o "hoje" da serie batam com o dia local do usuario.
@@ -43,6 +44,9 @@ export default async function Painel() {
         saidasMes={Number(r.saidas_mes)}
         mostrarAReceber={negocio.usa_fiado}
       />
+      {negocio.usa_carteiras && Number(r.limite_prolabore) > 0 && (
+        <CardProLabore retirado={Number(r.retirado_mes)} limite={Number(r.limite_prolabore)} />
+      )}
       <GraficoFluxo serie={serie} />
       <UltimosLancamentos itens={(ultimos ?? []).map((l) => ({ ...l, valor: Number(l.valor) }))} />
     </section>
