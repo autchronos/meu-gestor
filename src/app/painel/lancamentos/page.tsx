@@ -7,7 +7,7 @@ import { excluirLancamento } from "@/app/painel/lancamentos/acoes";
 
 export default async function Lancamentos({
   searchParams,
-}: { searchParams: { periodo?: string; tipo?: string; origem?: string } }) {
+}: { searchParams: { periodo?: string; tipo?: string; origem?: string; novo?: string } }) {
   const negocio = await negocioAtual();
   if (!negocio) return null;
   const supabase = criarClienteServidor();
@@ -25,58 +25,53 @@ export default async function Lancamentos({
   if (range) q = q.gte("data", range.de).lte("data", range.ate);
   if (searchParams.tipo === "entrada" || searchParams.tipo === "saida") q = q.eq("tipo", searchParams.tipo);
   if (searchParams.origem === "app" || searchParams.origem === "whatsapp") q = q.eq("origem", searchParams.origem);
-
   const { data: lancamentos } = await q;
 
   return (
     <section className="flex flex-col gap-4">
-      <h1 className="font-serif text-xl font-bold text-marca">Lançamentos</h1>
+      <h1 className="font-serif text-2xl text-marca">Lançamentos</h1>
 
-      <details className="rounded-md border border-borda p-3">
-        <summary className="cursor-pointer text-sm font-medium text-marca">Novo lançamento</summary>
-        <div className="mt-3">
+      <details open={searchParams?.novo === "1"} className="border border-borda bg-superficie">
+        <summary className="cursor-pointer px-5 py-3 text-sm font-semibold uppercase tracking-wider text-marca">Novo lançamento</summary>
+        <div className="border-t border-borda p-4">
           <FormLancamento categorias={categorias ?? []} usaCarteiras={negocio.usa_carteiras} hoje={hojeStr} />
         </div>
       </details>
 
       <form method="get" className="flex flex-wrap gap-2 text-sm">
-        <select name="periodo" defaultValue={searchParams.periodo ?? "mes_atual"} className="rounded-md border border-borda bg-superficie px-2 py-1 text-texto">
+        <select name="periodo" defaultValue={searchParams.periodo ?? "mes_atual"} className="border border-borda bg-superficie px-2 py-1 text-texto">
           <option value="mes_atual">Mês atual</option>
           <option value="mes_passado">Mês passado</option>
           <option value="ultimos_30">Últimos 30 dias</option>
           <option value="tudo">Tudo</option>
         </select>
-        <select name="tipo" defaultValue={searchParams.tipo ?? ""} className="rounded-md border border-borda bg-superficie px-2 py-1 text-texto">
-          <option value="">Todos</option>
-          <option value="entrada">Entradas</option>
-          <option value="saida">Saídas</option>
+        <select name="tipo" defaultValue={searchParams.tipo ?? ""} className="border border-borda bg-superficie px-2 py-1 text-texto">
+          <option value="">Todos</option><option value="entrada">Entradas</option><option value="saida">Saídas</option>
         </select>
-        <select name="origem" defaultValue={searchParams.origem ?? ""} className="rounded-md border border-borda bg-superficie px-2 py-1 text-texto">
-          <option value="">Toda origem</option>
-          <option value="app">App</option>
-          <option value="whatsapp">WhatsApp</option>
+        <select name="origem" defaultValue={searchParams.origem ?? ""} className="border border-borda bg-superficie px-2 py-1 text-texto">
+          <option value="">Toda origem</option><option value="app">App</option><option value="whatsapp">WhatsApp</option>
         </select>
-        <button type="submit" className="rounded-md border border-borda px-3 py-1 text-texto-suave hover:text-texto">Filtrar</button>
+        <button type="submit" className="border border-borda px-3 py-1 uppercase tracking-wider text-texto-suave hover:text-texto">Filtrar</button>
       </form>
 
-      <ul className="divide-y divide-borda rounded-md border border-borda">
-        {(lancamentos ?? []).map((l) => (
-          <li key={l.id} className="flex items-center justify-between gap-2 px-3 py-2 text-sm">
+      <ul className="border border-borda bg-superficie">
+        {(lancamentos ?? []).map((l, idx) => (
+          <li key={l.id} className={`flex items-center justify-between gap-2 px-5 py-3 text-sm ${idx !== (lancamentos ?? []).length - 1 ? "border-b border-borda" : ""}`}>
             <div className="min-w-0">
-              <p className="truncate text-texto">{l.descricao}{l.eh_retirada ? " (retirada)" : ""}</p>
+              <p className="truncate text-marca">{l.descricao}{l.eh_retirada ? " (retirada)" : ""}</p>
               <p className="text-xs text-texto-suave">{new Date(l.data + "T00:00:00").toLocaleDateString("pt-BR")} · {l.origem}</p>
             </div>
             <div className="flex items-center gap-3">
-              <span className={l.tipo === "entrada" ? "text-entrada" : "text-saida"}>
-                {l.tipo === "entrada" ? "+" : "-"}{formatarBRL(Number(l.valor))}
+              <span className={`tabular-nums ${l.tipo === "entrada" ? "text-entrada" : "text-saida"}`}>
+                {l.tipo === "entrada" ? "+" : "−"}{formatarBRL(Number(l.valor))}
               </span>
               <form action={excluirLancamento.bind(null, l.id)}>
-                <button type="submit" className="text-xs text-texto-suave hover:text-saida">×</button>
+                <button type="submit" className="text-xs text-texto-suave hover:text-saida">excluir</button>
               </form>
             </div>
           </li>
         ))}
-        {(lancamentos ?? []).length === 0 && <li className="px-3 py-6 text-center text-sm text-texto-suave">Nenhum lançamento no período.</li>}
+        {(lancamentos ?? []).length === 0 && <li className="px-5 py-8 text-center text-sm text-texto-suave">Nenhum lançamento no período.</li>}
       </ul>
     </section>
   );

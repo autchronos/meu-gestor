@@ -15,15 +15,15 @@ export default async function Categorias() {
 
   return (
     <section className="flex flex-col gap-4">
-      <h1 className="font-serif text-xl font-bold text-marca">Categorias</h1>
+      <h1 className="font-serif text-2xl text-marca">Categorias</h1>
       <FormCategoria />
       {[["Entradas", entradas, "text-entrada"], ["Saídas", saidas, "text-saida"]].map(
         ([titulo, itens, cor]) => (
           <div key={titulo as string}>
-            <h2 className={`text-sm font-semibold ${cor}`}>{titulo as string}</h2>
-            <ul className="mt-2 divide-y divide-borda rounded-md border border-borda">
-              {(itens as { id: string; nome: string }[]).map((c) => (
-                <li key={c.id} className="flex items-center justify-between px-3 py-2 text-sm text-texto">
+            <h2 className={`text-sm font-semibold uppercase tracking-wider ${cor}`}>{titulo as string}</h2>
+            <ul className="mt-2 border border-borda bg-superficie">
+              {(itens as { id: string; nome: string }[]).map((c, idx, arr) => (
+                <li key={c.id} className={`flex items-center justify-between px-5 py-3 text-sm text-marca ${idx !== arr.length - 1 ? "border-b border-borda" : ""}`}>
                   {c.nome}
                   <form action={excluirCategoria.bind(null, c.id)}>
                     <button type="submit" className="text-xs text-texto-suave hover:text-saida">Excluir</button>
@@ -31,7 +31,7 @@ export default async function Categorias() {
                 </li>
               ))}
               {(itens as unknown[]).length === 0 && (
-                <li className="px-3 py-2 text-sm text-texto-suave">Nenhuma ainda.</li>
+                <li className="px-5 py-3 text-sm text-texto-suave">Nenhuma ainda.</li>
               )}
             </ul>
           </div>

@@ -20,7 +20,7 @@ export function FormLancamento({
 
   const tipoCategoria = tipoUI === "entrada" ? "entrada" : "saida";
   const categoriasFiltradas = categorias.filter((c) => c.tipo === tipoCategoria);
-  const campo = "w-full rounded-md border border-borda bg-superficie px-3 py-2 text-sm text-texto";
+  const campo = "w-full border border-borda bg-superficie px-3 py-2 text-sm text-texto";
 
   function enviar() {
     setErro(null);
@@ -38,7 +38,7 @@ export function FormLancamento({
       <div className="flex gap-2">
         {(["entrada", "saida", ...(usaCarteiras ? ["retirada"] as const : [])] as TipoUI[]).map((t) => (
           <button key={t} type="button" onClick={() => { setTipoUI(t); setCategoriaId(""); }}
-            className={`flex-1 rounded-md border px-2 py-2 text-sm capitalize ${tipoUI === t ? "border-marca bg-marca text-white" : "border-borda text-texto-suave"}`}>
+            className={`flex-1 border px-2 py-2 text-sm capitalize ${tipoUI === t ? "border-marca bg-marca text-white" : "border-borda text-texto-suave"}`}>
             {t}
           </button>
         ))}
@@ -74,7 +74,7 @@ export function FormLancamento({
 
       {erro && <p role="alert" className="text-sm text-saida">{erro}</p>}
       <button type="button" onClick={enviar} disabled={pendente}
-        className="rounded-md bg-marca px-4 py-2 font-semibold text-white hover:opacity-90 disabled:opacity-60">
+        className="bg-marca px-4 py-2 font-semibold uppercase tracking-wider text-white hover:opacity-90 disabled:opacity-60">
         {pendente ? "Salvando..." : "Salvar lançamento"}
       </button>
     </div>

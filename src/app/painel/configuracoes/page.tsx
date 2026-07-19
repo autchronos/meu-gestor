@@ -11,7 +11,7 @@ export default async function Configuracoes() {
   };
   return (
     <section className="flex flex-col gap-4">
-      <h1 className="font-serif text-xl font-bold text-marca">Configurações</h1>
+      <h1 className="font-serif text-2xl text-marca">Configurações</h1>
       <p className="text-sm text-texto-suave">Ligue ou desligue os módulos do seu negócio.</p>
       <FormCapacidades inicial={flags} />
     </section>

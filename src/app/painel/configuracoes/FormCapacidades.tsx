@@ -19,16 +19,16 @@ export function FormCapacidades({ inicial }: { inicial: Flags }) {
   return (
     <div className="flex flex-col gap-3">
       {CAPACIDADES.map((c) => (
-        <label key={c.chave} className="flex items-start gap-3 rounded-md border border-borda p-3 text-sm">
+        <label key={c.chave} className="flex items-start gap-3 border border-borda bg-superficie p-4 text-sm">
           <input type="checkbox" checked={flags[c.chave]} onChange={(e) => setFlags((f) => ({ ...f, [c.chave]: e.target.checked }))} className="mt-1" />
           <span>
-            <span className="font-medium text-texto">{c.rotulo}</span>
+            <span className="font-medium text-marca">{c.rotulo}</span>
             <span className="block text-texto-suave">{c.descricao}</span>
           </span>
         </label>
       ))}
       <button type="button" onClick={salvar} disabled={pendente}
-        className="rounded-md bg-marca px-4 py-2 font-semibold text-white hover:opacity-90 disabled:opacity-60">
+        className="bg-marca px-4 py-2 font-semibold uppercase tracking-wider text-white hover:opacity-90 disabled:opacity-60">
         {pendente ? "Salvando..." : "Salvar"}
       </button>
       {msg && <p role="status" className="text-sm text-texto-suave">{msg}</p>}

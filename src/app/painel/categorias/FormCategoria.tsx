@@ -18,18 +18,18 @@ export function FormCategoria() {
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-borda p-3">
+    <div className="flex flex-col gap-2 border border-borda bg-superficie p-4">
       <div className="flex gap-2">
         <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nova categoria"
-          className="flex-1 rounded-md border border-borda bg-superficie px-3 py-2 text-sm text-texto" />
+          className="flex-1 border border-borda bg-superficie px-3 py-2 text-sm text-texto" />
         <select value={tipo} onChange={(e) => setTipo(e.target.value as "entrada" | "saida")}
-          className="rounded-md border border-borda bg-superficie px-2 text-sm text-texto">
+          className="border border-borda bg-superficie px-2 text-sm text-texto">
           <option value="entrada">Entrada</option>
           <option value="saida">Saída</option>
         </select>
       </div>
       <button type="button" onClick={adicionar} disabled={pendente}
-        className="rounded-md bg-marca px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60">
+        className="bg-marca px-4 py-2 text-sm font-semibold uppercase tracking-wider text-white hover:opacity-90 disabled:opacity-60">
         {pendente ? "Adicionando..." : "Adicionar categoria"}
       </button>
       {erro && <p role="alert" className="text-sm text-saida">{erro}</p>}
