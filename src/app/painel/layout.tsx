@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { negocioAtual } from "@/lib/supabase/negocioAtual";
-import { NavInferior } from "@/components/painel/NavInferior";
-import { sair } from "@/app/painel/acoes";
+import { Sidebar } from "@/components/nav/Sidebar";
+import { DrawerNav } from "@/components/nav/DrawerNav";
+import { BottomNav } from "@/components/nav/BottomNav";
 
 export default async function PainelLayout({ children }: { children: React.ReactNode }) {
   const supabase = criarClienteServidor();
@@ -12,15 +13,13 @@ export default async function PainelLayout({ children }: { children: React.React
   if (!negocio) redirect("/onboarding");
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-2xl flex-col px-4 pb-20 pt-6">
-      <header className="mb-4 flex items-center justify-between border-b border-borda pb-3">
-        <p className="font-serif text-lg font-bold text-marca">{negocio.nome}</p>
-        <form action={sair}>
-          <button type="submit" className="text-sm text-texto-suave hover:text-texto">Sair</button>
-        </form>
-      </header>
-      <main className="flex-1">{children}</main>
-      <NavInferior usaCarteiras={negocio.usa_carteiras} />
+    <div className="min-h-screen bg-fundo">
+      <Sidebar usaCarteiras={negocio.usa_carteiras} nome={negocio.nome} />
+      <DrawerNav usaCarteiras={negocio.usa_carteiras} nome={negocio.nome} />
+      <div className="lg:pl-60">
+        <main className="mx-auto max-w-3xl px-4 py-6 pb-24 lg:pb-10">{children}</main>
+      </div>
+      <BottomNav />
     </div>
   );
 }
