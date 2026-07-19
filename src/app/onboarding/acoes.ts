@@ -4,10 +4,12 @@ import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { nichoParaRamo } from "@/lib/auth/roteamento";
 import { templateDoRamo } from "@/templates/ramos";
 import { normalizarTelefone } from "@/lib/telefone";
+import type { Flags } from "@/lib/negocio/capacidades";
 
 export interface DadosOnboarding {
   nomeNegocio: string;
   nicho: string;
+  flags: Flags;
   whatsapp: string;
   saldoInicial: number;
 }
@@ -39,6 +41,9 @@ export async function criarNegocioCompleto(dados: DadosOnboarding) {
     return { erro: eRpc?.message ?? "Não foi possível criar o negócio." };
   }
 
+  // Grava as capacidades escolhidas (o dono pode UPDATE via negocios_update).
+  await supabase.from("negocios").update(dados.flags).eq("id", negocioId);
+
   // 2) Seeding sob RLS (o usuário já é membro). Uma falha aqui NÃO descarta o
   // negócio já criado, mas é reportada — nada de sucesso silencioso.
   const template = templateDoRamo(ramo);
@@ -61,7 +66,7 @@ export async function criarNegocioCompleto(dados: DadosOnboarding) {
     if (error) problemas.push("as categorias de exemplo");
   }
 
-  if (template.itens.length) {
+  if (template.itens.length && (dados.flags.usa_estoque || dados.flags.usa_locacao)) {
     const { error } = await supabase
       .from("itens")
       .insert(template.itens.map((i) => ({ ...i, negocio_id: negocioId })));
