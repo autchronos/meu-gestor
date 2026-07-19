@@ -1,9 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Lora } from "next/font/google";
+import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--fonte-sans" });
-const lora = Lora({ subsets: ["latin"], variable: "--fonte-serif" });
+const serif = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--fonte-serif",
+});
 
 export const metadata: Metadata = {
   title: "Autchronos — Meu Gestor Financeiro",
@@ -24,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} ${lora.variable}`}
+      className={`${inter.variable} ${serif.variable}`}
       suppressHydrationWarning
     >
       <head>

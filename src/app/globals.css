@@ -12,6 +12,8 @@
   --cor-dourado: #C9A227;
   --cor-entrada: #1B7A4B;
   --cor-saida: #9B2335;
+  --cor-navy-profundo: #0A1B30;
+  --cor-dourado-suave: #E0C868;
 }
 
 .dark {
@@ -24,9 +26,13 @@
   --cor-dourado: #D9B84A;
   --cor-entrada: #3FA76A;
   --cor-saida: #C85462;
+  --cor-navy-profundo: #06101E;
+  --cor-dourado-suave: #E0C868;
 }
 
 body {
   background-color: var(--cor-fundo);
   color: var(--cor-texto);
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  -webkit-font-smoothing: antialiased;
 }

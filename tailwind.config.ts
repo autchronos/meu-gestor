@@ -15,6 +15,8 @@ const config: Config = {
         dourado: "var(--cor-dourado)",
         entrada: "var(--cor-entrada)",
         saida: "var(--cor-saida)",
+        "navy-profundo": "var(--cor-navy-profundo)",
+        "dourado-suave": "var(--cor-dourado-suave)",
       },
       fontFamily: {
         serif: ["var(--fonte-serif)", "serif"],
