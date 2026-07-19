@@ -12,7 +12,7 @@ export function UltimosLancamentos({ itens }: { itens: Item[] }) {
           <ScrollText className="h-4 w-4 text-dourado" />
           <h2 className="text-sm font-semibold uppercase tracking-wider text-marca">Últimos lançamentos</h2>
         </div>
-        <Link href="/painel/lancamentos" className="flex items-center gap-1 text-xs font-medium text-marca hover:underline">
+        <Link href="/painel/lancamentos" className="flex items-center gap-1 text-xs font-medium text-marca transition-colors hover:text-dourado hover:underline">
           Ver extrato <ChevronRight className="h-3.5 w-3.5" />
         </Link>
       </div>

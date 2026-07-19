@@ -34,7 +34,6 @@ export default async function Painel() {
     (lancs30 ?? []).map((l) => ({ data: l.data, tipo: l.tipo, valor: Number(l.valor) })),
     hoje,
   );
-  const liquido = Number(r.entradas_mes) - Number(r.saidas_mes);
 
   return (
     <section className="flex flex-col gap-4">
@@ -48,7 +47,7 @@ export default async function Painel() {
       {negocio.usa_carteiras && Number(r.limite_prolabore) > 0 && (
         <CardProLabore retirado={Number(r.retirado_mes)} limite={Number(r.limite_prolabore)} />
       )}
-      <GraficoFluxo serie={serie} liquido={liquido} />
+      <GraficoFluxo serie={serie} />
       <UltimosLancamentos itens={(ultimos ?? []).map((l) => ({ ...l, valor: Number(l.valor) }))} />
     </section>
   );

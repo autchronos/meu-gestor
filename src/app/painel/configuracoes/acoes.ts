@@ -13,3 +13,16 @@ export async function salvarCapacidades(flags: Flags) {
   revalidatePath("/painel");
   return { ok: true };
 }
+
+export async function renomearNegocio(nome: string) {
+  const limpo = nome.trim();
+  if (!limpo) return { erro: "Informe o nome do negócio." };
+  const negocio = await negocioAtual();
+  if (!negocio) return { erro: "Negócio não encontrado." };
+  const supabase = criarClienteServidor();
+  const { error } = await supabase.from("negocios").update({ nome: limpo }).eq("id", negocio.id);
+  if (error) return { erro: "Não foi possível salvar o nome." };
+  revalidatePath("/painel");
+  revalidatePath("/painel/configuracoes");
+  return { ok: true };
+}

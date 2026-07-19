@@ -18,8 +18,8 @@ export function BottomNav() {
   const item = (i: { href: string; rotulo: string; Icone: typeof LayoutGrid }) => {
     const ativo = ehAtivo(path, i.href);
     return (
-      <Link key={i.href} href={i.href} aria-current={ativo ? "page" : undefined}
-        className={`flex flex-col items-center gap-1 py-2 text-[10px] uppercase tracking-wider ${ativo ? "text-dourado" : "text-white/70"}`}>
+      <Link key={i.href} href={i.href} title={i.rotulo} aria-current={ativo ? "page" : undefined}
+        className={`flex flex-col items-center gap-1 py-2 text-[10px] uppercase tracking-wider transition-colors ${ativo ? "text-dourado" : "text-white/70 hover:text-white"}`}>
         <i.Icone className="h-4 w-4" /> {i.rotulo}
       </Link>
     );
@@ -29,8 +29,8 @@ export function BottomNav() {
       <div className="mx-auto grid max-w-md grid-cols-5 items-center">
         {ESQ.map(item)}
         <div className="flex justify-center">
-          <Link href="/painel/lancamentos?novo=1" aria-label="Novo lançamento"
-            className="-mt-5 grid h-12 w-12 place-items-center border border-dourado bg-dourado text-marca shadow-[0_2px_0_0_rgba(0,0,0,0.15)]">
+          <Link href="/painel/lancamentos?novo=1" aria-label="Novo lançamento" title="Novo lançamento"
+            className="-mt-5 grid h-12 w-12 place-items-center border border-dourado bg-dourado text-marca shadow-[0_2px_0_0_rgba(0,0,0,0.15)] transition-transform hover:scale-105 active:scale-95">
             <Plus className="h-5 w-5" strokeWidth={2.5} />
           </Link>
         </div>

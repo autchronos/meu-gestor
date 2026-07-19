@@ -1,5 +1,6 @@
 import { negocioAtual } from "@/lib/supabase/negocioAtual";
 import { FormCapacidades } from "@/app/painel/configuracoes/FormCapacidades";
+import { FormNomeNegocio } from "@/app/painel/configuracoes/FormNomeNegocio";
 
 export default async function Configuracoes() {
   const negocio = await negocioAtual();
@@ -12,6 +13,7 @@ export default async function Configuracoes() {
   return (
     <section className="flex flex-col gap-4">
       <h1 className="font-serif text-2xl text-marca">Configurações</h1>
+      <FormNomeNegocio nomeAtual={negocio.nome} />
       <p className="text-sm text-texto-suave">Ligue ou desligue os módulos do seu negócio.</p>
       <FormCapacidades inicial={flags} />
     </section>
