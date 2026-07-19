@@ -1,56 +1,49 @@
-import { redirect } from "next/navigation";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
-import { sair } from "@/app/painel/acoes";
+import { negocioAtual } from "@/lib/supabase/negocioAtual";
+import { hojeSP } from "@/lib/caixa/periodo";
+import { serieFluxoCaixa } from "@/lib/caixa/fluxo";
+import { CardsSaldo } from "@/components/painel/CardsSaldo";
+import { GraficoFluxo } from "@/components/painel/GraficoFluxo";
+import { UltimosLancamentos } from "@/components/painel/UltimosLancamentos";
 
-export default async function Painel({
-  searchParams,
-}: {
-  searchParams: { aviso?: string };
-}) {
+export default async function Painel() {
+  const negocio = await negocioAtual();
+  if (!negocio) return null;
   const supabase = criarClienteServidor();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/entrar");
 
-  const { data: negocio } = await supabase
-    .from("negocios")
-    .select("nome")
-    .limit(1)
-    .maybeSingle();
+  const { data: resumo } = await supabase.rpc("resumo_dashboard", { p_negocio_id: negocio.id });
+  const r = resumo ?? { disponivel: 0, a_receber: 0, entradas_mes: 0, saidas_mes: 0 };
 
-  // Sem negócio ainda -> onboarding.
-  if (!negocio) redirect("/onboarding");
+  // Fuso America/Sao_Paulo: o servidor roda em UTC, entao usamos hojeSP() para
+  // que a janela de 30 dias e o "hoje" da serie batam com o dia local do usuario.
+  const hojeStr = hojeSP();
+  const [y, m, d] = hojeStr.split("-").map(Number);
+  const de = new Date(Date.UTC(y, m - 1, d - 29)).toISOString().slice(0, 10);
+  const hoje = new Date(hojeStr + "T12:00:00");
 
-  const aviso = searchParams?.aviso;
+  const { data: lancs30 } = await supabase
+    .from("lancamentos").select("data, tipo, valor")
+    .eq("carteira", "empresa").gte("data", de).order("data");
+  const { data: ultimos } = await supabase
+    .from("lancamentos").select("id, descricao, valor, tipo, data")
+    .order("data", { ascending: false }).order("created_at", { ascending: false }).limit(10);
+
+  const serie = serieFluxoCaixa(
+    (lancs30 ?? []).map((l) => ({ data: l.data, tipo: l.tipo, valor: Number(l.valor) })),
+    Number(r.disponivel), hoje,
+  );
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-4 py-10">
-      <header className="flex items-center justify-between border-b border-borda pb-4">
-        <div>
-          <p className="font-serif text-xl font-bold text-marca">{negocio.nome}</p>
-          <p className="text-sm text-texto-suave">{user.email}</p>
-        </div>
-        <form action={sair}>
-          <button type="submit" className="rounded-md border border-borda px-3 py-1.5 text-sm text-texto-suave hover:text-texto">
-            Sair
-          </button>
-        </form>
-      </header>
-
-      {aviso && (
-        <p
-          role="status"
-          className="rounded-md border border-borda px-4 py-3 text-sm text-saida"
-        >
-          {aviso}
-        </p>
-      )}
-      <div className="rounded-xl border border-borda bg-superficie p-6">
-        <p className="text-texto">
-          Conta e negócio configurados. O painel financeiro completo chega na Fase 3.
-        </p>
-      </div>
-    </main>
+    <section className="flex flex-col gap-4">
+      <CardsSaldo
+        disponivel={Number(r.disponivel)}
+        aReceber={Number(r.a_receber)}
+        entradasMes={Number(r.entradas_mes)}
+        saidasMes={Number(r.saidas_mes)}
+        mostrarAReceber={negocio.usa_fiado}
+      />
+      <GraficoFluxo serie={serie} />
+      <UltimosLancamentos itens={(ultimos ?? []).map((l) => ({ ...l, valor: Number(l.valor) }))} />
+    </section>
   );
 }
