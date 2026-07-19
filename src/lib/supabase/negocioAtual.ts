@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
 
 export interface NegocioAtual {
@@ -10,7 +11,8 @@ export interface NegocioAtual {
   usa_metas: boolean;
 }
 
-export async function negocioAtual(): Promise<NegocioAtual | null> {
+// cache() dedupe a consulta dentro do mesmo request (layout + page chamam juntos).
+export const negocioAtual = cache(async (): Promise<NegocioAtual | null> => {
   const supabase = criarClienteServidor();
   const { data } = await supabase
     .from("negocios")
@@ -18,4 +20,4 @@ export async function negocioAtual(): Promise<NegocioAtual | null> {
     .limit(1)
     .maybeSingle();
   return data ?? null;
-}
+});

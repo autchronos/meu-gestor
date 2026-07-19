@@ -15,9 +15,11 @@ export function NavInferior() {
     <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-borda bg-superficie">
       <div className="mx-auto flex max-w-2xl">
         {ITENS.map((i) => {
-          const ativo = i.href === "/painel" ? path === "/painel" : path.startsWith(i.href);
+          const ativo = i.href === "/painel"
+            ? path === "/painel"
+            : path === i.href || path.startsWith(`${i.href}/`);
           return (
-            <Link key={i.href} href={i.href}
+            <Link key={i.href} href={i.href} aria-current={ativo ? "page" : undefined}
               className={`flex-1 py-3 text-center text-xs ${ativo ? "font-semibold text-marca" : "text-texto-suave"}`}>
               {i.rotulo}
             </Link>

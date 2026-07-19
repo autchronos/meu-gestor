@@ -33,3 +33,16 @@ export function capacidadesPadrao(ramo: Ramo): Flags {
       return { ...BASE };
   }
 }
+
+// Server actions sao endpoints de rede: nunca espalhar o payload do cliente
+// direto num UPDATE. Isto pega SO as 5 flags conhecidas (coeridas a boolean),
+// descartando qualquer chave extra que um request forjado tente injetar.
+export function apenasFlags(f: Partial<Flags>): Flags {
+  return {
+    usa_estoque: !!f.usa_estoque,
+    usa_fiado: !!f.usa_fiado,
+    usa_locacao: !!f.usa_locacao,
+    usa_carteiras: !!f.usa_carteiras,
+    usa_metas: !!f.usa_metas,
+  };
+}

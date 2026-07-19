@@ -4,7 +4,7 @@ import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { nichoParaRamo } from "@/lib/auth/roteamento";
 import { templateDoRamo } from "@/templates/ramos";
 import { normalizarTelefone } from "@/lib/telefone";
-import type { Flags } from "@/lib/negocio/capacidades";
+import { apenasFlags, type Flags } from "@/lib/negocio/capacidades";
 
 export interface DadosOnboarding {
   nomeNegocio: string;
@@ -48,7 +48,7 @@ export async function criarNegocioCompleto(dados: DadosOnboarding) {
 
   // Grava as capacidades escolhidas (o dono pode UPDATE via negocios_update).
   {
-    const { error } = await supabase.from("negocios").update(dados.flags).eq("id", negocioId);
+    const { error } = await supabase.from("negocios").update(apenasFlags(dados.flags)).eq("id", negocioId);
     if (error) problemas.push("suas escolhas de módulos (ajuste em Configurações)");
   }
 
