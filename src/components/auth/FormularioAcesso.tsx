@@ -41,7 +41,9 @@ export function FormularioAcesso() {
       });
       setCarregando(false);
       if (error) {
-        setErro(error.message);
+        // Mensagem genérica de propósito: não confirmar se o e-mail já existe
+        // (evita enumeração de contas), igual ao caminho de login.
+        setErro("Não foi possível criar a conta. Se você já tem cadastro, use Entrar.");
         return;
       }
       setAviso("Enviamos um e-mail de confirmação. Confirme para entrar.");
@@ -97,13 +99,14 @@ export function FormularioAcesso() {
           type="password"
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
+          minLength={6}
           className="rounded-md border border-borda bg-superficie px-3 py-2 text-texto"
           autoComplete={modo === "entrar" ? "current-password" : "new-password"}
         />
       </label>
 
-      {erro && <p className="text-sm text-saida">{erro}</p>}
-      {aviso && <p className="text-sm text-entrada">{aviso}</p>}
+      {erro && <p role="alert" className="text-sm text-saida">{erro}</p>}
+      {aviso && <p role="status" className="text-sm text-entrada">{aviso}</p>}
 
       <button
         type="submit"
