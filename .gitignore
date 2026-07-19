@@ -7,6 +7,8 @@ coverage
 next-env.d.ts
 .env*.local
 .DS_Store
+# documentos de negócio (não versionar no repo do produto)
+/*.pdf
 # PWA (gerados por build)
 public/sw.js
 public/sw.js.map
