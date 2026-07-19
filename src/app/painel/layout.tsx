@@ -20,7 +20,7 @@ export default async function PainelLayout({ children }: { children: React.React
         </form>
       </header>
       <main className="flex-1">{children}</main>
-      <NavInferior />
+      <NavInferior usaCarteiras={negocio.usa_carteiras} />
     </div>
   );
 }
