@@ -28,3 +28,24 @@ test("podeInstalar fica true após o evento e instalar() chama prompt", async ()
   expect(prompt).toHaveBeenCalledOnce();
   expect(result.current.podeInstalar).toBe(false);
 });
+
+test("appinstalled marca instalado e limpa o evento", () => {
+  const { result } = renderHook(() => useInstallPrompt());
+  dispararBeforeInstallPrompt();
+  expect(result.current.podeInstalar).toBe(true);
+
+  act(() => {
+    window.dispatchEvent(new Event("appinstalled"));
+  });
+  expect(result.current.instalado).toBe(true);
+  expect(result.current.podeInstalar).toBe(false);
+});
+
+test("remove os listeners ao desmontar", () => {
+  const remover = vi.spyOn(window, "removeEventListener");
+  const { unmount } = renderHook(() => useInstallPrompt());
+  unmount();
+  expect(remover).toHaveBeenCalledWith("beforeinstallprompt", expect.any(Function));
+  expect(remover).toHaveBeenCalledWith("appinstalled", expect.any(Function));
+  remover.mockRestore();
+});
