@@ -41,13 +41,16 @@ export async function criarNegocioCompleto(dados: DadosOnboarding) {
     return { erro: eRpc?.message ?? "Não foi possível criar o negócio." };
   }
 
-  // Grava as capacidades escolhidas (o dono pode UPDATE via negocios_update).
-  await supabase.from("negocios").update(dados.flags).eq("id", negocioId);
-
   // 2) Seeding sob RLS (o usuário já é membro). Uma falha aqui NÃO descarta o
   // negócio já criado, mas é reportada — nada de sucesso silencioso.
   const template = templateDoRamo(ramo);
   const problemas: string[] = [];
+
+  // Grava as capacidades escolhidas (o dono pode UPDATE via negocios_update).
+  {
+    const { error } = await supabase.from("negocios").update(dados.flags).eq("id", negocioId);
+    if (error) problemas.push("suas escolhas de módulos (ajuste em Configurações)");
+  }
 
   if (dados.whatsapp.trim()) {
     const { error } = await supabase.from("negocio_telefones").insert({
