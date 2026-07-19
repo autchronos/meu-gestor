@@ -15,8 +15,11 @@ async function iconePadrao(tamanho, arquivo) {
     .toFile(`${DESTINO}/${arquivo}`);
 }
 
-async function iconeMaskable(tamanho, arquivo) {
-  const interno = Math.round(tamanho * 0.7); // área de segurança
+// Fundo sólido navy + logo centralizado. Usado no maskable (área de segurança
+// maior) e no apple-touch-icon (iOS ignora transparência e recorta sozinho, por
+// isso precisa de fundo opaco e da arte preenchendo mais).
+async function iconeSobreMarca(tamanho, proporcao, arquivo, destino = DESTINO) {
+  const interno = Math.round(tamanho * proporcao);
   const logo = await sharp(ORIGEM)
     .resize(interno, interno, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .png()
@@ -26,10 +29,12 @@ async function iconeMaskable(tamanho, arquivo) {
   })
     .composite([{ input: logo, gravity: "center" }])
     .png()
-    .toFile(`${DESTINO}/${arquivo}`);
+    .toFile(`${destino}/${arquivo}`);
 }
 
 await iconePadrao(192, "icon-192.png");
 await iconePadrao(512, "icon-512.png");
-await iconeMaskable(512, "icon-maskable-512.png");
-console.log("Ícones gerados em", DESTINO);
+await iconeSobreMarca(512, 0.7, "icon-maskable-512.png");
+// apple-touch-icon: Next detecta src/app/apple-icon.png e injeta o <link>.
+await iconeSobreMarca(180, 0.82, "apple-icon.png", "src/app");
+console.log("Ícones gerados em", DESTINO, "+ src/app/apple-icon.png");

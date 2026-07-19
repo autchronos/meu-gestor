@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Lora } from "next/font/google";
 import "./globals.css";
 
@@ -8,6 +8,10 @@ const lora = Lora({ subsets: ["latin"], variable: "--fonte-serif" });
 export const metadata: Metadata = {
   title: "Autchronos — Meu Gestor Financeiro",
   description: "Gestão financeira e fluxo de caixa para micro-empreendedores.",
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0A2540",
 };
 
 const scriptTema = `try{if(localStorage.getItem('tema')==='escuro'){document.documentElement.classList.add('dark')}}catch(e){}`;
