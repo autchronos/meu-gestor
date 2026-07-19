@@ -17,13 +17,16 @@ function assert(c, m) { if (!c) { console.error("FALHOU:", m); process.exit(1); 
 
 const ts = Date.now();
 const email = `resumo_${ts}@autchronos.test`;
-const { data: u } = await admin.auth.admin.createUser({ email, password: "senha123", email_confirm: true });
+const { data: u, error: eUser } = await admin.auth.admin.createUser({ email, password: "senha123", email_confirm: true });
+assert(!eUser && u?.user?.id, `criou usuario de teste${eUser ? " (" + eUser.message + ")" : ""}`);
 const cli = createClient(url, anon, { auth: { persistSession: false } });
-await cli.auth.signInWithPassword({ email, password: "senha123" });
+const { error: eLogin } = await cli.auth.signInWithPassword({ email, password: "senha123" });
+assert(!eLogin, `login do usuario de teste${eLogin ? " (" + eLogin.message + ")" : ""}`);
 
-const { data: negId } = await cli.rpc("criar_negocio", { p_nome: "Resumo", p_ramo: "outro" });
+const { data: negId, error: eRpc } = await cli.rpc("criar_negocio", { p_nome: "Resumo", p_ramo: "outro" });
+assert(!eRpc && negId, `criar_negocio devolveu id${eRpc ? " (" + eRpc.message + ")" : ""}`);
 const { error: eIns } = await cli.from("lancamentos").insert([
-  { negocio_id: negId, tipo: "entrada", descricao: "venda", valor: 300, carteira: "empresa" },
+  { negocio_id: negId, tipo: "entrada", descricao: "venda", valor: 300, carteira: "empresa", eh_retirada: false },
   { negocio_id: negId, tipo: "saida", descricao: "retirada", valor: 100, carteira: "empresa", eh_retirada: true },
 ]);
 assert(!eIns, "inseriu os lancamentos de teste");
