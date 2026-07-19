@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { negocioAtual } from "@/lib/supabase/negocioAtual";
+import { hojeSP } from "@/lib/caixa/periodo";
 import { resolverLancamento, type TipoUI, type Carteira } from "@/lib/caixa/lancamento";
 
 export interface DadosLancamento {
@@ -18,10 +19,20 @@ export interface DadosLancamento {
 export async function salvarLancamento(d: DadosLancamento) {
   if (d.valor <= 0) return { erro: "Informe um valor maior que zero." };
   if (!d.descricao.trim()) return { erro: "Informe uma descrição." };
+  if (d.data > hojeSP()) return { erro: "A data não pode ser futura." };
   const negocio = await negocioAtual();
   if (!negocio) return { erro: "Negócio não encontrado." };
   const supabase = criarClienteServidor();
-  const r = resolverLancamento(d.tipoUI, d.carteira);
+
+  // Gating no servidor (o form já esconde, mas server action é endpoint): sem
+  // carteiras, tudo é da empresa e não existe retirada.
+  let carteira = d.carteira;
+  if (!negocio.usa_carteiras) {
+    if (d.tipoUI === "retirada") return { erro: "Retiradas estão desativadas nas configurações." };
+    carteira = "empresa";
+  }
+
+  const r = resolverLancamento(d.tipoUI, carteira);
 
   const payload = {
     negocio_id: negocio.id,
