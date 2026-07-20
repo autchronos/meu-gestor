@@ -16,8 +16,8 @@ export default async function PainelLayout({ children }: { children: React.React
     <div className="min-h-screen bg-fundo">
       <Sidebar usaCarteiras={negocio.usa_carteiras} nome={negocio.nome} />
       <DrawerNav usaCarteiras={negocio.usa_carteiras} nome={negocio.nome} />
-      <div className="lg:pl-16">
-        <main className="mx-auto max-w-3xl px-4 py-6 pb-24 lg:pb-10">{children}</main>
+      <div className="lg:pl-14">
+        <main className="pb-24 lg:pb-10">{children}</main>
       </div>
       <BottomNav />
     </div>

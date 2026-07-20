@@ -2,6 +2,7 @@ import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { negocioAtual } from "@/lib/supabase/negocioAtual";
 import { hojeSP } from "@/lib/caixa/periodo";
 import { serieEntradaSaida } from "@/lib/caixa/fluxoES";
+import { HeroSaldo } from "@/components/painel/HeroSaldo";
 import { CardsSaldo } from "@/components/painel/CardsSaldo";
 import { GraficoFluxo } from "@/components/painel/GraficoFluxo";
 import { UltimosLancamentos } from "@/components/painel/UltimosLancamentos";
@@ -36,19 +37,20 @@ export default async function Painel() {
   );
 
   return (
-    <section className="flex flex-col gap-4">
-      <CardsSaldo
+    <>
+      <HeroSaldo
         disponivel={Number(r.disponivel)}
         aReceber={Number(r.a_receber)}
-        entradasMes={Number(r.entradas_mes)}
-        saidasMes={Number(r.saidas_mes)}
         mostrarAReceber={negocio.usa_fiado}
       />
-      {negocio.usa_carteiras && Number(r.limite_prolabore) > 0 && (
-        <CardProLabore retirado={Number(r.retirado_mes)} limite={Number(r.limite_prolabore)} />
-      )}
-      <GraficoFluxo serie={serie} />
-      <UltimosLancamentos itens={(ultimos ?? []).map((l) => ({ ...l, valor: Number(l.valor) }))} />
-    </section>
+      <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-6">
+        <CardsSaldo entradasMes={Number(r.entradas_mes)} saidasMes={Number(r.saidas_mes)} />
+        {negocio.usa_carteiras && Number(r.limite_prolabore) > 0 && (
+          <CardProLabore retirado={Number(r.retirado_mes)} limite={Number(r.limite_prolabore)} />
+        )}
+        <GraficoFluxo serie={serie} />
+        <UltimosLancamentos itens={(ultimos ?? []).map((l) => ({ ...l, valor: Number(l.valor) }))} />
+      </div>
+    </>
   );
 }

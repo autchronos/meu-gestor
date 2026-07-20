@@ -29,7 +29,7 @@ export default async function Retiradas() {
   const pct = limite > 0 ? Math.min(100, Math.round((retiradoMes / limite) * 100)) : 0;
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-6">
       <h1 className="font-serif text-2xl text-marca">Retiradas (pró-labore)</h1>
 
       <div className="border border-borda bg-superficie p-4">

@@ -28,7 +28,7 @@ export default async function Lancamentos({
   const { data: lancamentos } = await q;
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-6">
       <h1 className="font-serif text-2xl text-marca">Lançamentos</h1>
 
       <details open={searchParams?.novo === "1"} className="border border-borda bg-superficie">

@@ -14,7 +14,7 @@ export default async function Categorias() {
   const saidas = lista.filter((c) => c.tipo === "saida");
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-6">
       <h1 className="font-serif text-2xl text-marca">Categorias</h1>
       <FormCategoria />
       {[["Entradas", entradas, "text-entrada"], ["Saídas", saidas, "text-saida"]].map(

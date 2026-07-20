@@ -11,7 +11,7 @@ export default async function Configuracoes() {
     usa_metas: negocio.usa_metas,
   };
   return (
-    <section className="flex flex-col gap-4">
+    <section className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-6">
       <h1 className="font-serif text-2xl text-marca">Configurações</h1>
       <FormNomeNegocio nomeAtual={negocio.nome} />
       <p className="text-sm text-texto-suave">Ligue ou desligue os módulos do seu negócio.</p>
