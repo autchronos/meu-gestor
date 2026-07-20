@@ -10,8 +10,12 @@ test("intervaloRelatorio: hoje/semana/mes/tudo", () => {
   expect(intervaloRelatorio("tudo", "2026-07-19")).toEqual({ de: "2000-01-01", ate: "2026-07-19" });
 });
 
-test("mesAnterior atravessa a virada do ano", () => {
-  expect(mesAnterior("2026-01-10")).toEqual({ de: "2025-12-01", ate: "2025-12-31" });
+test("mesAnterior: janela comparavel (1o ate o mesmo dia) e virada do ano", () => {
+  expect(mesAnterior("2026-01-10")).toEqual({ de: "2025-12-01", ate: "2025-12-10" });
+});
+
+test("mesAnterior: trava no ultimo dia quando o mes anterior e mais curto", () => {
+  expect(mesAnterior("2026-03-31")).toEqual({ de: "2026-02-01", ate: "2026-02-28" });
 });
 
 test("margemPct", () => {

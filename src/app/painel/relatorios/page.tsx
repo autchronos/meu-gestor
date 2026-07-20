@@ -27,7 +27,7 @@ export default async function Relatorios({ searchParams }: { searchParams: { per
     supabase.from("receber").select("valor").eq("negocio_id", negocio.id).eq("pago", false),
   ]);
 
-  const houveErro = Boolean(selR.error || mesR.error || antR.error);
+  const houveErro = Boolean(selR.error || mesR.error || antR.error || metasR.error || receberR.error);
 
   const dados = (d: unknown) => {
     const o = (d ?? {}) as { faturamento?: number; custos?: number };

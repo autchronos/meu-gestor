@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     .from("lancamentos")
     .select("data, descricao, tipo, valor, eh_retirada")
     .eq("negocio_id", negocio.id)
+    .eq("carteira", "empresa") // mesmo escopo dos cards do relatorio (retirada marcada, dá p/ filtrar)
     .gte("data", de).lte("data", ate)
     .order("data", { ascending: false });
 

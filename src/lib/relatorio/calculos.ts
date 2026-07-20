@@ -14,13 +14,17 @@ export function intervaloRelatorio(periodo: string | undefined, hoje: string): I
   return { de: `${y}-${String(m).padStart(2, "0")}-01`, ate: hoje };
 }
 
+// Janela COMPARÁVEL do mês anterior: 1º até o mesmo dia de hoje (para
+// comparar mês-a-mês no mesmo trecho — parcial vs. parcial, não vs. mês cheio).
+// Se hoje for dia 31 e o mês anterior tiver menos dias, trava no último dia dele.
 export function mesAnterior(hoje: string): Intervalo {
-  const [y, m] = hoje.split("-").map(Number);
+  const [y, m, d] = hoje.split("-").map(Number);
   const pm = m === 1 ? 12 : m - 1;
   const py = m === 1 ? y - 1 : y;
   const ultimo = new Date(Date.UTC(py, pm, 0)).getUTCDate();
+  const dia = Math.min(d, ultimo);
   const mm = String(pm).padStart(2, "0");
-  return { de: `${py}-${mm}-01`, ate: `${py}-${mm}-${String(ultimo).padStart(2, "0")}` };
+  return { de: `${py}-${mm}-01`, ate: `${py}-${mm}-${String(dia).padStart(2, "0")}` };
 }
 
 export function margemPct(faturamento: number, custos: number): number {
