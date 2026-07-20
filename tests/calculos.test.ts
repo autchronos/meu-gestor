@@ -29,4 +29,9 @@ test("progressoMeta", () => {
   expect(progressoMeta(555, 3000)).toBe(19);
   expect(progressoMeta(5000, 3000)).toBe(100);
   expect(progressoMeta(100, 0)).toBe(0);
+  expect(progressoMeta(-50, 3000)).toBe(0); // nunca negativo
+});
+
+test("intervaloRelatorio: semana atravessa a virada do mês", () => {
+  expect(intervaloRelatorio("semana", "2026-08-03")).toEqual({ de: "2026-07-28", ate: "2026-08-03" });
 });
