@@ -27,6 +27,8 @@ export default async function Relatorios({ searchParams }: { searchParams: { per
     supabase.from("receber").select("valor").eq("negocio_id", negocio.id).eq("pago", false),
   ]);
 
+  const houveErro = Boolean(selR.error || mesR.error || antR.error);
+
   const dados = (d: unknown) => {
     const o = (d ?? {}) as { faturamento?: number; custos?: number };
     return { faturamento: Number(o.faturamento ?? 0), custos: Number(o.custos ?? 0) };
@@ -50,6 +52,11 @@ export default async function Relatorios({ searchParams }: { searchParams: { per
         </div>
       </div>
       <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-6">
+        {houveErro && (
+          <p role="alert" className="border border-saida bg-superficie px-4 py-3 text-sm text-saida">
+            Não foi possível carregar os números agora. Tente atualizar a página em instantes.
+          </p>
+        )}
         <div className="border border-borda bg-superficie p-4">
           <p className="text-sm font-semibold uppercase tracking-wider text-marca">Metas do mês</p>
           <Meta label="Faturamento" atual={mesD.faturamento} meta={metaFat} variacao={varFat} />
