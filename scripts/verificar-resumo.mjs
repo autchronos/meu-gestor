@@ -43,6 +43,17 @@ await cli.from("metas").update({ limite_prolabore: 300 }).eq("negocio_id", negId
 const { data: resumo2 } = await cli.rpc("resumo_dashboard", { p_negocio_id: negId });
 assert(Number(resumo2.limite_prolabore) === 300, `limite_prolabore = 300 (veio ${resumo2?.limite_prolabore})`);
 
+// Fase 3C: relatorio (faturamento = entradas; custos = saidas nao-retirada).
+const { error: eDesp } = await cli.from("lancamentos").insert({
+  negocio_id: negId, tipo: "saida", descricao: "despesa", valor: 50, carteira: "empresa", eh_retirada: false,
+});
+assert(!eDesp, "inseriu a despesa de teste");
+const hojeIso = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
+const { data: rel, error: eRel } = await cli.rpc("relatorio", { p_negocio_id: negId, p_de: "2000-01-01", p_ate: hojeIso });
+assert(!eRel, "relatorio executa");
+assert(Number(rel.faturamento) === 300, `faturamento = 300 (veio ${rel?.faturamento})`);
+assert(Number(rel.custos) === 50, `custos = 50 (retirada fora; veio ${rel?.custos})`);
+
 await admin.from("negocios").delete().eq("id", negId);
 await admin.auth.admin.deleteUser(u.user.id);
 console.log("RESUMO OK");
