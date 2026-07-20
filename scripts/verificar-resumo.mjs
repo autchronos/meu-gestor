@@ -54,6 +54,21 @@ assert(!eRel, "relatorio executa");
 assert(Number(rel.faturamento) === 300, `faturamento = 300 (veio ${rel?.faturamento})`);
 assert(Number(rel.custos) === 50, `custos = 50 (retirada fora; veio ${rel?.custos})`);
 
+// Fase 4: conta a receber -> marcar pago -> entrada LIQUIDA no caixa.
+const { data: cli4, error: eCli4 } = await cli.from("clientes")
+  .insert({ negocio_id: negId, nome: "Fulano Teste", tipo: "pessoa" }).select("id").single();
+assert(!eCli4 && cli4?.id, "criou cliente de teste");
+const { data: rec, error: eRec } = await cli.from("receber")
+  .insert({ negocio_id: negId, cliente_id: cli4.id, descricao: "venda a prazo", valor: 200, taxa: 10 })
+  .select("id").single();
+assert(!eRec && rec?.id, "criou conta a receber (200, taxa 10)");
+await cli.from("receber").update({ pago: true }).eq("id", rec.id);
+const { data: lanc4 } = await cli.from("lancamentos").select("valor, tipo").eq("receber_id", rec.id).maybeSingle();
+assert(lanc4 && Number(lanc4.valor) === 180 && lanc4.tipo === "entrada", `pago gera entrada liquida 180 (veio ${lanc4?.valor})`);
+await cli.from("receber").update({ pago: false }).eq("id", rec.id);
+const { count: nLanc } = await cli.from("lancamentos").select("id", { count: "exact", head: true }).eq("receber_id", rec.id);
+assert((nLanc ?? 0) === 0, "desmarcar pago apaga o lancamento");
+
 await admin.from("negocios").delete().eq("id", negId);
 await admin.auth.admin.deleteUser(u.user.id);
 console.log("RESUMO OK");
