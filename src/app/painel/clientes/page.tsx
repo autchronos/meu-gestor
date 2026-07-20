@@ -3,7 +3,7 @@ import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { negocioAtual } from "@/lib/supabase/negocioAtual";
 import { formatarBRL } from "@/lib/formato";
 import { FormCliente } from "@/app/painel/clientes/FormCliente";
-import { excluirCliente } from "@/app/painel/clientes/acoes";
+import { excluirClienteForm } from "@/app/painel/clientes/acoes";
 
 export default async function Clientes() {
   const negocio = await negocioAtual();
@@ -35,7 +35,7 @@ export default async function Clientes() {
                 {devePor.get(c.id) ? (
                   <span className="tabular-nums text-texto-suave">deve {formatarBRL(devePor.get(c.id)!)}</span>
                 ) : null}
-                <form action={async () => { await excluirCliente(c.id); }}>
+                <form action={excluirClienteForm.bind(null, c.id)}>
                   <button type="submit" className="text-xs text-texto-suave hover:text-saida">Excluir</button>
                 </form>
               </div>

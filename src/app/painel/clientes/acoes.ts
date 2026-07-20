@@ -41,3 +41,10 @@ export async function excluirCliente(id: string) {
   revalidatePath("/painel/clientes");
   return { ok: true };
 }
+
+// Wrapper void para usar direto em <form action> (Server Action registrada).
+// Um closure inline que só chama excluirCliente NÃO é uma Server Action e
+// derruba a pagina em runtime; este export do modulo "use server" é válido.
+export async function excluirClienteForm(id: string) {
+  await excluirCliente(id);
+}
