@@ -24,6 +24,8 @@ export function itensNav(flags: Flags): ItemNav[] {
   ];
   if (flags.usa_fiado) {
     itens.push({ href: "/painel/a-receber", rotulo: "A receber", Icone: HandCoins });
+  }
+  if (flags.usa_fiado || flags.usa_locacao) {
     itens.push({ href: "/painel/clientes", rotulo: "Clientes", Icone: Users });
   }
   if (flags.usa_estoque || flags.usa_locacao) {

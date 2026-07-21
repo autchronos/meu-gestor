@@ -8,7 +8,7 @@ import { excluirClienteForm } from "@/app/painel/clientes/acoes";
 export default async function Clientes() {
   const negocio = await negocioAtual();
   if (!negocio) return null;
-  if (!negocio.usa_fiado) redirect("/painel");
+  if (!negocio.usa_fiado && !negocio.usa_locacao) redirect("/painel");
   const supabase = criarClienteServidor();
 
   const [{ data: clientes }, { data: abertas }] = await Promise.all([
