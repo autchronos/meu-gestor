@@ -21,6 +21,14 @@ export default async function Painel() {
   const { data: metaMin } = await supabase.from("metas").select("saldo_minimo").eq("negocio_id", negocio.id).maybeSingle();
   const alertaSaldo = deveAlertarSaldo(Number(r.disponivel), Number(metaMin?.saldo_minimo ?? 0));
 
+  let acabando = 0;
+  if (negocio.usa_estoque) {
+    const { data: itensCtrl } = await supabase.from("itens")
+      .select("estoque, estoque_minimo").eq("negocio_id", negocio.id)
+      .eq("ativo", true).eq("controla_estoque", true).gt("estoque_minimo", 0);
+    acabando = (itensCtrl ?? []).filter((i) => Number(i.estoque) <= Number(i.estoque_minimo)).length;
+  }
+
   // Fuso America/Sao_Paulo: o servidor roda em UTC; hojeSP() garante que a janela
   // de 30 dias e o "hoje" da série batam com o dia local do usuário.
   const hojeStr = hojeSP();
@@ -49,6 +57,11 @@ export default async function Painel() {
         mostrarAReceber={negocio.usa_fiado}
       />
       <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-6">
+        {acabando > 0 && (
+          <a href="/painel/itens" role="alert" className="border border-saida bg-superficie px-4 py-3 text-sm text-saida">
+            {acabando === 1 ? "1 item está acabando." : `${acabando} itens estão acabando.`} Ver itens →
+          </a>
+        )}
         {alertaSaldo && (
           <p role="alert" className="border border-saida bg-superficie px-4 py-3 text-sm text-saida">
             Seu caixa está abaixo do saldo mínimo que você definiu ({formatarBRL(Number(metaMin?.saldo_minimo ?? 0))}).
