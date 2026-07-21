@@ -21,7 +21,7 @@ export interface DadosLocacao {
 export async function registrarLocacao(d: DadosLocacao) {
   if (!d.cliente.trim()) return { erro: "Informe o cliente." };
   if (!d.item_id) return { erro: "Escolha um item." };
-  if (d.quantidade <= 0) return { erro: "Informe a quantidade." };
+  if (!(d.quantidade > 0)) return { erro: "Informe a quantidade." }; // pega NaN também
   if (d.valor < 0) return { erro: "O valor não pode ser negativo." };
   if (!d.devolucao_prevista) return { erro: "Informe a devolução prevista." };
   const g = await guarda();
@@ -43,21 +43,26 @@ export async function registrarLocacao(d: DadosLocacao) {
   });
   if (eLoc) return { erro: "Não foi possível registrar a locação." };
 
+  // A locacao ja esta gravada; se o lancamento do dinheiro falhar, avisamos
+  // (nao engolir o erro num app financeiro) — mesmo padrao do reporEstoque.
+  let avisoPagamento = "";
   if (d.valor > 0 && d.pagamento === "recebido") {
-    await supabase.from("lancamentos").insert({
+    const { error } = await supabase.from("lancamentos").insert({
       negocio_id: g.negocio.id, tipo: "entrada", carteira: "empresa", eh_retirada: false,
       valor: d.valor, descricao: `Aluguel · ${item.nome}`, data: d.data_retirada || hojeSP(), categoria_id: null,
     });
+    if (error) avisoPagamento = "Locação registrada, mas não foi possível lançar a entrada no caixa.";
   } else if (d.valor > 0 && d.pagamento === "receber") {
-    await supabase.from("receber").insert({
+    const { error } = await supabase.from("receber").insert({
       negocio_id: g.negocio.id, cliente_id: clienteId, descricao: `Aluguel · ${item.nome}`,
       valor: d.valor, vencimento: d.devolucao_prevista, taxa: 0,
     });
+    if (error) avisoPagamento = "Locação registrada, mas não foi possível criar a conta a receber.";
   }
   revalidatePath("/painel/locacoes");
   revalidatePath("/painel/itens");
   revalidatePath("/painel");
-  return { ok: true };
+  return avisoPagamento ? { erro: avisoPagamento } : { ok: true };
 }
 
 async function setDevolucao(id: string, devolvido: boolean) {
