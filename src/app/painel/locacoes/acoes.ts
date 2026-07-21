@@ -62,6 +62,8 @@ export async function registrarLocacao(d: DadosLocacao) {
   revalidatePath("/painel/locacoes");
   revalidatePath("/painel/itens");
   revalidatePath("/painel");
+  revalidatePath("/painel/lancamentos"); // a entrada "recebido" aparece la
+  revalidatePath("/painel/a-receber"); // a conta "a receber" aparece la
   return avisoPagamento ? { erro: avisoPagamento } : { ok: true };
 }
 
