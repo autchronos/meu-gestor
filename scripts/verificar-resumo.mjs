@@ -85,6 +85,22 @@ await cli.from("lancamentos").delete().eq("id", v5.id);
 const { data: it5c } = await cli.from("itens").select("estoque").eq("id", it5.id).maybeSingle();
 assert(Number(it5c.estoque) === 40, `excluir a venda devolveu o estoque para 40 (veio ${it5c?.estoque})`);
 
+// Fase 5B: locacao (recebido) cria entrada; reserva sobe; devolucao limpa.
+const { data: itAl, error: eItAl } = await cli.from("itens")
+  .insert({ negocio_id: negId, nome: "Furadeira", preco: 80, tipo: "aluguel", estoque: 3 }).select("id").single();
+assert(!eItAl && itAl?.id, "criou item de aluguel (estoque 3)");
+const { data: cliLoc } = await cli.from("clientes").insert({ negocio_id: negId, nome: "Locatario Teste", tipo: "pessoa" }).select("id").single();
+const { data: loc, error: eLoc } = await cli.from("locacoes")
+  .insert({ negocio_id: negId, item_id: itAl.id, cliente_id: cliLoc.id, quantidade: 1, valor: 80, devolucao_prevista: "2999-01-01" }).select("id").single();
+assert(!eLoc && loc?.id, "registrou locacao (qtd 1)");
+const { data: abertas } = await cli.from("locacoes").select("quantidade").eq("item_id", itAl.id).is("devolvido_em", null);
+const reservado = (abertas ?? []).reduce((a, x) => a + Number(x.quantidade), 0);
+assert(reservado === 1, `reserva do item = 1 (veio ${reservado})`);
+const hojeIso2 = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
+await cli.from("locacoes").update({ devolvido_em: hojeIso2 }).eq("id", loc.id);
+const { data: abertas2 } = await cli.from("locacoes").select("id").eq("item_id", itAl.id).is("devolvido_em", null);
+assert((abertas2 ?? []).length === 0, "apos devolucao, item sem locacao aberta");
+
 await admin.from("negocios").delete().eq("id", negId);
 await admin.auth.admin.deleteUser(u.user.id);
 console.log("RESUMO OK");
