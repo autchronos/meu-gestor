@@ -26,6 +26,7 @@ export async function salvarCliente(d: { id?: string; nome: string; telefone: st
     return { erro: resp.error.code === "23505" ? "Já existe um cliente com esse nome." : "Não foi possível salvar o cliente." };
   }
   revalidatePath("/painel/clientes");
+  revalidatePath("/painel/a-receber"); // o datalist de nomes vive la
   return { ok: true };
 }
 
@@ -39,6 +40,7 @@ export async function excluirCliente(id: string) {
   const { error } = await supabase.from("clientes").delete().eq("id", id);
   if (error) return { erro: "Não foi possível excluir o cliente." };
   revalidatePath("/painel/clientes");
+  revalidatePath("/painel/a-receber");
   return { ok: true };
 }
 
