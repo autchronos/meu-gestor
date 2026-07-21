@@ -5,6 +5,7 @@ import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { negocioAtual } from "@/lib/supabase/negocioAtual";
 import { hojeSP } from "@/lib/caixa/periodo";
 import { resolverLancamento, type TipoUI, type Carteira } from "@/lib/caixa/lancamento";
+import { totalVenda, descricaoItens } from "@/lib/estoque/calculos";
 
 export interface DadosLancamento {
   id?: string;
@@ -69,7 +70,8 @@ export async function registrarVenda(d: { itens: LinhaVendaInput[]; categoria_id
   // Precos autoritativos do servidor (nunca confiar no cliente).
   const ids = [...new Set(linhas.map((l) => l.item_id))];
   const { data: itens } = await supabase
-    .from("itens").select("id, nome, preco").eq("negocio_id", negocio.id).eq("ativo", true).in("id", ids);
+    .from("itens").select("id, nome, preco").eq("negocio_id", negocio.id)
+    .eq("ativo", true).eq("tipo", "venda").in("id", ids);
   const mapa = new Map((itens ?? []).map((i) => [i.id, i]));
   if (mapa.size !== ids.length) return { erro: "Algum item não foi encontrado." };
 
@@ -77,8 +79,8 @@ export async function registrarVenda(d: { itens: LinhaVendaInput[]; categoria_id
     const it = mapa.get(l.item_id)!;
     return { item_id: l.item_id, quantidade: Math.trunc(l.quantidade), preco_unitario: Number(it.preco), nome: it.nome };
   });
-  const valor = Math.round(detalhes.reduce((a, x) => a + x.quantidade * x.preco_unitario, 0) * 100) / 100;
-  const descricao = detalhes.map((x) => `${x.quantidade}× ${x.nome}`).join(", ");
+  const valor = totalVenda(detalhes.map((x) => ({ quantidade: x.quantidade, preco: x.preco_unitario })));
+  const descricao = descricaoItens(detalhes);
 
   const { data: lanc, error: eLanc } = await supabase.from("lancamentos").insert({
     negocio_id: negocio.id, tipo: "entrada", carteira: "empresa", eh_retirada: false,
