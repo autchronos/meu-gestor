@@ -7,12 +7,12 @@ import { hojeSP } from "@/lib/caixa/periodo";
 async function guarda() {
   const negocio = await negocioAtual();
   if (!negocio) return { negocio: null, erro: "Negócio não encontrado." as string };
-  if (!negocio.usa_estoque) return { negocio: null, erro: "Estoque está desativado nas configurações." as string };
+  if (!negocio.usa_estoque && !negocio.usa_locacao) return { negocio: null, erro: "Itens estão desativados nas configurações." as string };
   return { negocio, erro: "" };
 }
 
 export interface DadosItem {
-  id?: string; nome: string; preco: number; unidade: string;
+  id?: string; nome: string; preco: number; unidade: string; tipo: "venda" | "aluguel";
   controla_estoque: boolean; estoque: number; estoque_minimo: number;
 }
 
@@ -22,17 +22,18 @@ export async function salvarItem(d: DadosItem) {
   if (d.preco < 0) return { erro: "O preço não pode ser negativo." };
   const g = await guarda();
   if (!g.negocio) return { erro: g.erro };
+  if (d.tipo === "venda" && !g.negocio.usa_estoque) return { erro: "Vendas com estoque estão desativadas." };
+  if (d.tipo === "aluguel" && !g.negocio.usa_locacao) return { erro: "Aluguel está desativado." };
   const supabase = criarClienteServidor();
-  // Base: campos editaveis. O estoque so entra na CRIACAO (depois muda via
-  // venda/reposicao, nunca por edicao do cadastro).
+  // Base: campos editaveis. O estoque e o tipo so entram na CRIACAO (depois
+  // estoque muda via venda/reposicao, nunca por edicao do cadastro; tipo nao muda).
   const base = {
     negocio_id: g.negocio.id, nome, preco: d.preco, unidade: d.unidade.trim() || "un",
-    tipo: "venda", controla_estoque: d.controla_estoque,
-    estoque_minimo: Math.max(0, Math.trunc(d.estoque_minimo)),
+    controla_estoque: d.controla_estoque, estoque_minimo: Math.max(0, Math.trunc(d.estoque_minimo)),
   };
   const resp = d.id
     ? await supabase.from("itens").update(base).eq("id", d.id)
-    : await supabase.from("itens").insert({ ...base, estoque: Math.trunc(d.estoque) });
+    : await supabase.from("itens").insert({ ...base, tipo: d.tipo, estoque: Math.trunc(d.estoque) });
   if (resp.error) return { erro: "Não foi possível salvar o item." };
   revalidatePath("/painel/itens");
   revalidatePath("/painel/lancamentos");
