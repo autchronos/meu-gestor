@@ -1,9 +1,10 @@
 import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { negocioAtual } from "@/lib/supabase/negocioAtual";
 import { hojeSP } from "@/lib/caixa/periodo";
-import { intervaloRelatorio, mesAnterior, margemPct, variacaoPct, progressoMeta, type Intervalo } from "@/lib/relatorio/calculos";
+import { intervaloRelatorio, mesAnterior, margemPct, variacaoPct, progressoMeta, mesesRestantes, type Intervalo } from "@/lib/relatorio/calculos";
 import { formatarBRL } from "@/lib/formato";
 import { FormMetas } from "@/app/painel/relatorios/FormMetas";
+import { FormReserva } from "@/app/painel/relatorios/FormReserva";
 
 const PERIODOS = [
   { v: "hoje", r: "Hoje" }, { v: "semana", r: "Semana" }, { v: "mes", r: "Mês" }, { v: "tudo", r: "Tudo" },
@@ -23,7 +24,7 @@ export default async function Relatorios({ searchParams }: { searchParams: { per
   const rpc = (i: Intervalo) => supabase.rpc("relatorio", { p_negocio_id: negocio.id, p_de: i.de, p_ate: i.ate });
   const [selR, mesR, antR, metasR, receberR] = await Promise.all([
     rpc(sel), rpc(mesAt), rpc(mesAnt),
-    supabase.from("metas").select("meta_faturamento, meta_lucro").eq("negocio_id", negocio.id).maybeSingle(),
+    supabase.from("metas").select("meta_faturamento, meta_lucro, reserva_alvo, reserva_prazo, valor_reservado, saldo_minimo").eq("negocio_id", negocio.id).maybeSingle(),
     supabase.from("receber").select("valor").eq("negocio_id", negocio.id).eq("pago", false),
   ]);
 
@@ -37,6 +38,12 @@ export default async function Relatorios({ searchParams }: { searchParams: { per
   const metaFat = Number(metasR.data?.meta_faturamento ?? 0);
   const metaLuc = Number(metasR.data?.meta_lucro ?? 0);
   const aReceber = (receberR.data ?? []).reduce((a, x) => a + Number(x.valor), 0);
+  const reservaAlvo = Number(metasR.data?.reserva_alvo ?? 0);
+  const reservaPrazo = (metasR.data?.reserva_prazo as string | null) ?? "";
+  const reservado = Number(metasR.data?.valor_reservado ?? 0);
+  const saldoMinimo = Number(metasR.data?.saldo_minimo ?? 0);
+  const pctReserva = progressoMeta(reservado, reservaAlvo);
+  const mesesReserva = mesesRestantes(reservaPrazo || null, hoje);
 
   const lucroMes = mesD.faturamento - mesD.custos;
   const lucroSel = selD.faturamento - selD.custos;
@@ -88,6 +95,19 @@ export default async function Relatorios({ searchParams }: { searchParams: { per
           className="border border-marca px-4 py-2 text-center text-sm font-semibold uppercase tracking-wider text-marca transition-colors hover:bg-marca hover:text-white">
           Exportar CSV
         </a>
+
+        <div className="border border-borda bg-superficie p-4">
+          <p className="text-sm font-semibold uppercase tracking-wider text-marca">Reserva de emergência</p>
+          <div className="mt-3 flex items-baseline justify-between text-sm">
+            <span className="text-texto">Guardado</span>
+            <span className="tabular-nums text-texto-suave">{formatarBRL(reservado)} / {formatarBRL(reservaAlvo)} <span className="text-marca">({pctReserva}%)</span></span>
+          </div>
+          <div className="mt-1 h-2 w-full overflow-hidden bg-borda"><div className="h-full bg-dourado" style={{ width: `${pctReserva}%` }} /></div>
+          {reservaPrazo && mesesReserva !== null && (
+            <p className="mt-1 text-xs text-texto-suave">prazo {reservaPrazo} · faltam {mesesReserva} {mesesReserva === 1 ? "mês" : "meses"}</p>
+          )}
+        </div>
+        <FormReserva alvoAtual={reservaAlvo} prazoAtual={reservaPrazo} saldoMinimoAtual={saldoMinimo} />
 
         <FormMetas faturamentoAtual={metaFat} lucroAtual={metaLuc} />
       </div>
