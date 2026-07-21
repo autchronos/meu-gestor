@@ -90,6 +90,7 @@ export async function editarReceber(d: DadosReceber) {
   }).eq("id", d.id);
   if (error) return { erro: "Não foi possível salvar as alterações." };
   revalidatePath("/painel/a-receber");
+  revalidatePath("/painel");
   return { ok: true };
 }
 
@@ -111,6 +112,10 @@ export async function excluirReceber(id: string) {
   const g = await guarda();
   if (!g.negocio) return { erro: g.erro };
   const supabase = criarClienteServidor();
+  // Conta paga tem lancamento no caixa (receber_id ON DELETE CASCADE): excluir
+  // apagaria a entrada e dessincronizaria o caixa. Exige desmarcar antes.
+  const { data: atual } = await supabase.from("receber").select("pago").eq("id", id).maybeSingle();
+  if (atual?.pago) return { erro: "Não dá para excluir uma conta paga. Desmarque o pagamento primeiro." };
   const { error } = await supabase.from("receber").delete().eq("id", id);
   if (error) return { erro: "Não foi possível excluir a conta." };
   revalidatePath("/painel/a-receber");
