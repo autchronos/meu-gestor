@@ -69,6 +69,22 @@ await cli.from("receber").update({ pago: false }).eq("id", rec.id);
 const { count: nLanc } = await cli.from("lancamentos").select("id", { count: "exact", head: true }).eq("receber_id", rec.id);
 assert((nLanc ?? 0) === 0, "desmarcar pago apaga o lancamento");
 
+// Fase 5A: venda baixa estoque; excluir devolve.
+const { data: it5, error: eIt5 } = await cli.from("itens")
+  .insert({ negocio_id: negId, nome: "Produto Teste", preco: 10, tipo: "venda", controla_estoque: true, estoque: 40 })
+  .select("id").single();
+assert(!eIt5 && it5?.id, "criou item com estoque 40");
+const { data: v5, error: eV5 } = await cli.from("lancamentos")
+  .insert({ negocio_id: negId, tipo: "entrada", descricao: "venda itens", valor: 20, carteira: "empresa", eh_retirada: false })
+  .select("id").single();
+assert(!eV5 && v5?.id, "criou lancamento da venda");
+await cli.from("lancamento_itens").insert({ lancamento_id: v5.id, item_id: it5.id, quantidade: 2, preco_unitario: 10 });
+const { data: it5b } = await cli.from("itens").select("estoque").eq("id", it5.id).maybeSingle();
+assert(Number(it5b.estoque) === 38, `venda de 2 baixou estoque 40->38 (veio ${it5b?.estoque})`);
+await cli.from("lancamentos").delete().eq("id", v5.id);
+const { data: it5c } = await cli.from("itens").select("estoque").eq("id", it5.id).maybeSingle();
+assert(Number(it5c.estoque) === 40, `excluir a venda devolveu o estoque para 40 (veio ${it5c?.estoque})`);
+
 await admin.from("negocios").delete().eq("id", negId);
 await admin.auth.admin.deleteUser(u.user.id);
 console.log("RESUMO OK");

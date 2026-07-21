@@ -1,6 +1,6 @@
 import {
   LayoutGrid, ScrollText, ArrowUpFromLine, Tags, BarChart3, Settings,
-  HandCoins, Users,
+  HandCoins, Users, Package,
   type LucideIcon,
 } from "lucide-react";
 
@@ -13,6 +13,7 @@ export interface ItemNav {
 interface Flags {
   usa_carteiras: boolean;
   usa_fiado: boolean;
+  usa_estoque: boolean;
 }
 
 export function itensNav(flags: Flags): ItemNav[] {
@@ -23,6 +24,9 @@ export function itensNav(flags: Flags): ItemNav[] {
   if (flags.usa_fiado) {
     itens.push({ href: "/painel/a-receber", rotulo: "A receber", Icone: HandCoins });
     itens.push({ href: "/painel/clientes", rotulo: "Clientes", Icone: Users });
+  }
+  if (flags.usa_estoque) {
+    itens.push({ href: "/painel/itens", rotulo: "Itens", Icone: Package });
   }
   if (flags.usa_carteiras) {
     itens.push({ href: "/painel/retiradas", rotulo: "Retiradas", Icone: ArrowUpFromLine });
