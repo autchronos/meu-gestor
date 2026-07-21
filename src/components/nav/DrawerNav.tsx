@@ -7,10 +7,10 @@ import { Menu, X } from "lucide-react";
 import { itensNav, ehAtivo } from "@/lib/nav/itens";
 import { sair } from "@/app/painel/acoes";
 
-export function DrawerNav({ usaCarteiras, usaFiado, usaEstoque, nome }: { usaCarteiras: boolean; usaFiado: boolean; usaEstoque: boolean; nome: string }) {
+export function DrawerNav({ usaCarteiras, usaFiado, usaEstoque, usaLocacao, nome }: { usaCarteiras: boolean; usaFiado: boolean; usaEstoque: boolean; usaLocacao: boolean; nome: string }) {
   const [aberto, setAberto] = useState(false);
   const path = usePathname();
-  const itens = itensNav({ usa_carteiras: usaCarteiras, usa_fiado: usaFiado, usa_estoque: usaEstoque });
+  const itens = itensNav({ usa_carteiras: usaCarteiras, usa_fiado: usaFiado, usa_estoque: usaEstoque, usa_locacao: usaLocacao });
   return (
     <>
       <header className="flex items-center justify-between border-b border-white/10 bg-marca px-4 py-3 text-white lg:hidden">

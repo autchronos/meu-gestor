@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { negocioAtual } from "@/lib/supabase/negocioAtual";
+import { resolverCliente } from "@/lib/clientes/resolver";
 
 export interface DadosReceber {
   id?: string;
@@ -24,25 +25,6 @@ function valida(d: DadosReceber): string | null {
   if (d.valor <= 0) return "Informe um valor maior que zero.";
   if (!d.descricao.trim()) return "Informe uma descrição.";
   if (d.taxa < 0 || d.taxa > 100) return "A taxa deve ficar entre 0 e 100%.";
-  return null;
-}
-
-// Busca (case-insensitive) ou cria o cliente; devolve o id.
-async function resolverCliente(
-  supabase: ReturnType<typeof criarClienteServidor>, negocioId: string, nome: string,
-): Promise<string | null> {
-  const { data: existente } = await supabase
-    .from("clientes").select("id").eq("negocio_id", negocioId).ilike("nome", nome).maybeSingle();
-  if (existente?.id) return existente.id;
-  const { data: novo, error } = await supabase
-    .from("clientes").insert({ negocio_id: negocioId, nome, tipo: "pessoa" }).select("id").single();
-  if (novo?.id) return novo.id;
-  // Corrida de duplo-clique: a UNIQUE (0009) barra o 2o insert -> re-busca.
-  if (error?.code === "23505") {
-    const { data: r } = await supabase
-      .from("clientes").select("id").eq("negocio_id", negocioId).ilike("nome", nome).maybeSingle();
-    return r?.id ?? null;
-  }
   return null;
 }
 

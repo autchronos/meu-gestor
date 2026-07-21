@@ -3,12 +3,13 @@ import { useState, useTransition } from "react";
 import { salvarItem, reporEstoque } from "@/app/painel/itens/acoes";
 import { parseValorBRL } from "@/lib/formato";
 
-interface Inicial { id: string; nome: string; preco: number; unidade: string; controla_estoque: boolean; estoque_minimo: number }
+interface Inicial { id: string; nome: string; preco: number; unidade: string; controla_estoque: boolean; estoque_minimo: number; tipo: "venda" | "aluguel" }
 
 const campo = "w-full border border-borda bg-superficie px-3 py-2 text-sm text-texto";
 
-export function FormItem({ inicial }: { inicial?: Inicial }) {
+export function FormItem({ inicial, podeVenda = true, podeAluguel = false }: { inicial?: Inicial; podeVenda?: boolean; podeAluguel?: boolean }) {
   const ed = Boolean(inicial?.id);
+  const [tipo, setTipo] = useState<"venda" | "aluguel">(inicial?.tipo ?? (podeVenda ? "venda" : "aluguel"));
   const [nome, setNome] = useState(inicial?.nome ?? "");
   const [preco, setPreco] = useState(inicial ? String(inicial.preco).replace(".", ",") : "");
   const [unidade, setUnidade] = useState(inicial?.unidade ?? "un");
@@ -22,7 +23,7 @@ export function FormItem({ inicial }: { inicial?: Inicial }) {
     setMsg(null);
     iniciar(async () => {
       const r = await salvarItem({
-        id: inicial?.id, nome, preco: parseValorBRL(preco), unidade,
+        id: inicial?.id, nome, preco: parseValorBRL(preco), unidade, tipo,
         controla_estoque: controla, estoque: parseInt(estoque || "0", 10),
         estoque_minimo: parseInt(minimo || "0", 10),
       });
@@ -36,6 +37,12 @@ export function FormItem({ inicial }: { inicial?: Inicial }) {
     <div className="flex flex-col gap-2 border border-borda bg-superficie p-4">
       <p className="text-sm font-semibold uppercase tracking-wider text-marca">{ed ? "Editar item" : "Novo item"}</p>
       <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome do item" className={campo} />
+      {!ed && podeVenda && podeAluguel && (
+        <select value={tipo} onChange={(e) => setTipo(e.target.value as "venda" | "aluguel")} className={campo}>
+          <option value="venda">Venda</option>
+          <option value="aluguel">Aluguel</option>
+        </select>
+      )}
       <div className="grid grid-cols-2 gap-2">
         <input value={preco} onChange={(e) => setPreco(e.target.value)} inputMode="decimal" placeholder="Preço 0,00" className={campo} />
         <input value={unidade} onChange={(e) => setUnidade(e.target.value)} placeholder="Unidade (un, kg...)" className={campo} />

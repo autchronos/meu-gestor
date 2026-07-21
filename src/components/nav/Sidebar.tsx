@@ -9,9 +9,9 @@ import { sair } from "@/app/painel/acoes";
 // Colapsada por padrão (só ícones, w-14); expande no hover (w-60). Os rótulos
 // somem por opacidade quando colapsada (nada de palavra vazando) e aparecem no
 // hover. Fica fixa e sobre o conteúdo (que mantém o padding da largura colapsada).
-export function Sidebar({ usaCarteiras, usaFiado, usaEstoque, nome }: { usaCarteiras: boolean; usaFiado: boolean; usaEstoque: boolean; nome: string }) {
+export function Sidebar({ usaCarteiras, usaFiado, usaEstoque, usaLocacao, nome }: { usaCarteiras: boolean; usaFiado: boolean; usaEstoque: boolean; usaLocacao: boolean; nome: string }) {
   const path = usePathname();
-  const itens = itensNav({ usa_carteiras: usaCarteiras, usa_fiado: usaFiado, usa_estoque: usaEstoque });
+  const itens = itensNav({ usa_carteiras: usaCarteiras, usa_fiado: usaFiado, usa_estoque: usaEstoque, usa_locacao: usaLocacao });
   const rotulo =
     "whitespace-nowrap opacity-0 transition-opacity duration-200 group-hover:opacity-100";
   return (

@@ -3,55 +3,108 @@ import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { negocioAtual } from "@/lib/supabase/negocioAtual";
 import { formatarBRL } from "@/lib/formato";
 import { estaAcabando } from "@/lib/estoque/calculos";
+import { disponivelAluguel } from "@/lib/locacao/calculos";
 import { FormItem, FormRepor } from "@/app/painel/itens/FormItem";
 import { excluirItemForm } from "@/app/painel/itens/acoes";
 
 export default async function Itens() {
   const negocio = await negocioAtual();
   if (!negocio) return null;
-  if (!negocio.usa_estoque) redirect("/painel");
+  if (!negocio.usa_estoque && !negocio.usa_locacao) redirect("/painel");
   const supabase = criarClienteServidor();
-  const { data: itens } = await supabase
-    .from("itens").select("id, nome, preco, unidade, controla_estoque, estoque, estoque_minimo")
-    .eq("negocio_id", negocio.id).eq("tipo", "venda").eq("ativo", true).order("nome");
+
+  const { data: todos } = await supabase
+    .from("itens").select("id, nome, preco, unidade, tipo, controla_estoque, estoque, estoque_minimo")
+    .eq("negocio_id", negocio.id).eq("ativo", true).order("nome");
+  const venda = (todos ?? []).filter((i) => i.tipo === "venda");
+  const aluguel = (todos ?? []).filter((i) => i.tipo === "aluguel");
+
+  // Reserva derivada por item (locacoes abertas).
+  const reservaPorItem = new Map<string, number>();
+  if (negocio.usa_locacao && aluguel.length) {
+    const { data: abertas } = await supabase
+      .from("locacoes").select("item_id, quantidade").eq("negocio_id", negocio.id).is("devolvido_em", null);
+    for (const l of abertas ?? []) reservaPorItem.set(l.item_id, (reservaPorItem.get(l.item_id) ?? 0) + Number(l.quantidade));
+  }
 
   return (
     <section className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-6">
       <h1 className="font-serif text-2xl text-marca">Itens</h1>
-      <FormItem />
-      <ul className="border border-borda bg-superficie">
-        {(itens ?? []).map((it, idx, arr) => {
-          // Vinho quando está no/abaixo do mínimo OU negativo (venda além do estoque).
-          const alerta = estaAcabando(Number(it.estoque), Number(it.estoque_minimo), it.controla_estoque) || Number(it.estoque) < 0;
-          return (
-            <li key={it.id} className={idx !== arr.length - 1 ? "border-b border-borda" : ""}>
-              <div className="flex items-center justify-between px-5 py-3 text-sm">
-                <div>
-                  <p className="text-marca">{it.nome}</p>
-                  <p className="text-xs text-texto-suave">
-                    {formatarBRL(Number(it.preco))} / {it.unidade}
-                    {it.controla_estoque && <> · estoque <span className={alerta ? "text-saida" : "text-texto"}>{it.estoque}</span>{alerta ? " (acabando)" : ""}</>}
-                  </p>
-                </div>
-                <form action={excluirItemForm.bind(null, it.id)}>
-                  <button type="submit" className="text-xs text-texto-suave hover:text-saida">Excluir</button>
-                </form>
-              </div>
-              <details className="border-t border-borda">
-                <summary className="cursor-pointer px-5 py-2 text-xs uppercase tracking-wider text-texto-suave">Editar</summary>
-                <div className="p-4"><FormItem inicial={{ id: it.id, nome: it.nome, preco: Number(it.preco), unidade: it.unidade, controla_estoque: it.controla_estoque, estoque_minimo: Number(it.estoque_minimo) }} /></div>
-              </details>
-              {it.controla_estoque && (
-                <details className="border-t border-borda">
-                  <summary className="cursor-pointer px-5 py-2 text-xs uppercase tracking-wider text-texto-suave">Repor / tirar estoque</summary>
-                  <div className="px-4 pb-4"><FormRepor id={it.id} /></div>
-                </details>
-              )}
-            </li>
-          );
-        })}
-        {(itens ?? []).length === 0 && <li className="px-5 py-3 text-sm text-texto-suave">Nenhum item ainda.</li>}
-      </ul>
+      <FormItem podeVenda={negocio.usa_estoque} podeAluguel={negocio.usa_locacao} />
+
+      {negocio.usa_estoque && (
+        <div>
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-marca">Venda</h2>
+          <ul className="mt-2 border border-borda bg-superficie">
+            {venda.map((it, idx, arr) => {
+              const alerta = estaAcabando(Number(it.estoque), Number(it.estoque_minimo), it.controla_estoque) || Number(it.estoque) < 0;
+              return (
+                <li key={it.id} className={idx !== arr.length - 1 ? "border-b border-borda" : ""}>
+                  <div className="flex items-center justify-between px-5 py-3 text-sm">
+                    <div>
+                      <p className="text-marca">{it.nome}</p>
+                      <p className="text-xs text-texto-suave">
+                        {formatarBRL(Number(it.preco))} / {it.unidade}
+                        {it.controla_estoque && <> · estoque <span className={alerta ? "text-saida" : "text-texto"}>{it.estoque}</span>{alerta ? " (acabando)" : ""}</>}
+                      </p>
+                    </div>
+                    <form action={excluirItemForm.bind(null, it.id)}>
+                      <button type="submit" className="text-xs text-texto-suave hover:text-saida">Excluir</button>
+                    </form>
+                  </div>
+                  <details className="border-t border-borda">
+                    <summary className="cursor-pointer px-5 py-2 text-xs uppercase tracking-wider text-texto-suave">Editar</summary>
+                    <div className="p-4"><FormItem podeVenda podeAluguel={false} inicial={{ id: it.id, nome: it.nome, preco: Number(it.preco), unidade: it.unidade, controla_estoque: it.controla_estoque, estoque_minimo: Number(it.estoque_minimo), tipo: "venda" }} /></div>
+                  </details>
+                  {it.controla_estoque && (
+                    <details className="border-t border-borda">
+                      <summary className="cursor-pointer px-5 py-2 text-xs uppercase tracking-wider text-texto-suave">Repor / tirar estoque</summary>
+                      <div className="px-4 pb-4"><FormRepor id={it.id} /></div>
+                    </details>
+                  )}
+                </li>
+              );
+            })}
+            {venda.length === 0 && <li className="px-5 py-3 text-sm text-texto-suave">Nenhum item de venda.</li>}
+          </ul>
+        </div>
+      )}
+
+      {negocio.usa_locacao && (
+        <div>
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-marca">Aluguel</h2>
+          <ul className="mt-2 border border-borda bg-superficie">
+            {aluguel.map((it, idx, arr) => {
+              const reservado = reservaPorItem.get(it.id) ?? 0;
+              const disp = disponivelAluguel(Number(it.estoque), reservado);
+              return (
+                <li key={it.id} className={idx !== arr.length - 1 ? "border-b border-borda" : ""}>
+                  <div className="flex items-center justify-between px-5 py-3 text-sm">
+                    <div>
+                      <p className="text-marca">{it.nome}</p>
+                      <p className="text-xs text-texto-suave">
+                        {formatarBRL(Number(it.preco))} / {it.unidade} · possui {it.estoque} · disponível <span className={disp < 0 ? "text-saida" : "text-texto"}>{disp}</span>
+                      </p>
+                    </div>
+                    <form action={excluirItemForm.bind(null, it.id)}>
+                      <button type="submit" className="text-xs text-texto-suave hover:text-saida">Excluir</button>
+                    </form>
+                  </div>
+                  <details className="border-t border-borda">
+                    <summary className="cursor-pointer px-5 py-2 text-xs uppercase tracking-wider text-texto-suave">Editar</summary>
+                    <div className="p-4"><FormItem podeVenda={false} podeAluguel inicial={{ id: it.id, nome: it.nome, preco: Number(it.preco), unidade: it.unidade, controla_estoque: it.controla_estoque, estoque_minimo: Number(it.estoque_minimo), tipo: "aluguel" }} /></div>
+                  </details>
+                  <details className="border-t border-borda">
+                    <summary className="cursor-pointer px-5 py-2 text-xs uppercase tracking-wider text-texto-suave">Ajustar unidades</summary>
+                    <div className="px-4 pb-4"><FormRepor id={it.id} /></div>
+                  </details>
+                </li>
+              );
+            })}
+            {aluguel.length === 0 && <li className="px-5 py-3 text-sm text-texto-suave">Nenhum item de aluguel.</li>}
+          </ul>
+        </div>
+      )}
     </section>
   );
 }
