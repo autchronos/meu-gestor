@@ -36,6 +36,7 @@ export async function salvarItem(d: DadosItem) {
   if (resp.error) return { erro: "Não foi possível salvar o item." };
   revalidatePath("/painel/itens");
   revalidatePath("/painel/lancamentos");
+  revalidatePath("/painel"); // item novo pode já entrar como "acabando" no alerta
   return { ok: true };
 }
 
@@ -73,5 +74,6 @@ export async function reporEstoque(id: string, quantidade: number, pago: number)
   }
   revalidatePath("/painel/itens");
   revalidatePath("/painel");
+  revalidatePath("/painel/lancamentos"); // a despesa e o novo estoque aparecem lá
   return { ok: true };
 }

@@ -107,4 +107,5 @@ export async function excluirLancamento(id: string) {
   await supabase.from("lancamentos").delete().eq("id", id);
   revalidatePath("/painel");
   revalidatePath("/painel/lancamentos");
+  revalidatePath("/painel/itens"); // excluir venda com itens devolve estoque (trigger)
 }
