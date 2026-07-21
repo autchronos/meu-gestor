@@ -1,6 +1,7 @@
 import {
   intervaloRelatorio, mesAnterior, margemPct, variacaoPct, progressoMeta,
 } from "@/lib/relatorio/calculos";
+import { mesesRestantes, deveAlertarSaldo } from "@/lib/relatorio/calculos";
 
 test("intervaloRelatorio: hoje/semana/mes/tudo", () => {
   expect(intervaloRelatorio("hoje", "2026-07-19")).toEqual({ de: "2026-07-19", ate: "2026-07-19" });
@@ -38,4 +39,17 @@ test("progressoMeta", () => {
 
 test("intervaloRelatorio: semana atravessa a virada do mês", () => {
   expect(intervaloRelatorio("semana", "2026-08-03")).toEqual({ de: "2026-07-28", ate: "2026-08-03" });
+});
+
+test("mesesRestantes: futuro, ajuste por dia, passado e nulo", () => {
+  expect(mesesRestantes("2026-12-01", "2026-07-20")).toBe(4); // 5 meses, mas dia 1 < 20 -> 4
+  expect(mesesRestantes("2026-12-30", "2026-07-20")).toBe(5);
+  expect(mesesRestantes("2026-01-01", "2026-07-20")).toBe(0); // passado -> 0
+  expect(mesesRestantes(null, "2026-07-20")).toBeNull();
+});
+
+test("deveAlertarSaldo: so quando ha minimo definido e o caixa cai abaixo", () => {
+  expect(deveAlertarSaldo(300, 500)).toBe(true);
+  expect(deveAlertarSaldo(500, 500)).toBe(false);
+  expect(deveAlertarSaldo(300, 0)).toBe(false);
 });

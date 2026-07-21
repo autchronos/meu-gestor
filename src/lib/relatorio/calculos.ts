@@ -41,3 +41,18 @@ export function progressoMeta(atual: number, meta: number): number {
   if (meta <= 0) return 0;
   return Math.max(0, Math.min(100, Math.round((atual / meta) * 100)));
 }
+
+// Meses cheios de hoje ate o prazo (>= 0). Sem prazo => null.
+export function mesesRestantes(prazo: string | null, hoje: string): number | null {
+  if (!prazo) return null;
+  const [hy, hm, hd] = hoje.split("-").map(Number);
+  const [py, pm, pd] = prazo.split("-").map(Number);
+  let meses = (py - hy) * 12 + (pm - hm);
+  if (pd < hd) meses -= 1;
+  return Math.max(0, meses);
+}
+
+// Alerta so quando existe um minimo definido e o disponivel caiu abaixo dele.
+export function deveAlertarSaldo(disponivel: number, saldoMinimo: number): boolean {
+  return saldoMinimo > 0 && disponivel < saldoMinimo;
+}

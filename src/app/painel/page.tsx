@@ -2,6 +2,8 @@ import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { negocioAtual } from "@/lib/supabase/negocioAtual";
 import { hojeSP } from "@/lib/caixa/periodo";
 import { serieEntradaSaida } from "@/lib/caixa/fluxoES";
+import { formatarBRL } from "@/lib/formato";
+import { deveAlertarSaldo } from "@/lib/relatorio/calculos";
 import { HeroSaldo } from "@/components/painel/HeroSaldo";
 import { CardsSaldo } from "@/components/painel/CardsSaldo";
 import { GraficoFluxo } from "@/components/painel/GraficoFluxo";
@@ -15,6 +17,9 @@ export default async function Painel() {
 
   const { data: resumo } = await supabase.rpc("resumo_dashboard", { p_negocio_id: negocio.id });
   const r = resumo ?? { disponivel: 0, a_receber: 0, entradas_mes: 0, saidas_mes: 0, retirado_mes: 0, limite_prolabore: 0 };
+
+  const { data: metaMin } = await supabase.from("metas").select("saldo_minimo").eq("negocio_id", negocio.id).maybeSingle();
+  const alertaSaldo = deveAlertarSaldo(Number(r.disponivel), Number(metaMin?.saldo_minimo ?? 0));
 
   // Fuso America/Sao_Paulo: o servidor roda em UTC; hojeSP() garante que a janela
   // de 30 dias e o "hoje" da série batam com o dia local do usuário.
@@ -44,6 +49,11 @@ export default async function Painel() {
         mostrarAReceber={negocio.usa_fiado}
       />
       <div className="mx-auto flex max-w-3xl flex-col gap-4 px-4 py-6">
+        {alertaSaldo && (
+          <p role="alert" className="border border-saida bg-superficie px-4 py-3 text-sm text-saida">
+            Seu caixa está abaixo do saldo mínimo que você definiu ({formatarBRL(Number(metaMin?.saldo_minimo ?? 0))}).
+          </p>
+        )}
         <CardsSaldo entradasMes={Number(r.entradas_mes)} saidasMes={Number(r.saidas_mes)} />
         {negocio.usa_carteiras && Number(r.limite_prolabore) > 0 && (
           <CardProLabore retirado={Number(r.retirado_mes)} limite={Number(r.limite_prolabore)} />
