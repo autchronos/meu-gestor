@@ -21,7 +21,8 @@ export default async function Itens() {
       <FormItem />
       <ul className="border border-borda bg-superficie">
         {(itens ?? []).map((it, idx, arr) => {
-          const acabando = estaAcabando(Number(it.estoque), Number(it.estoque_minimo), it.controla_estoque);
+          // Vinho quando está no/abaixo do mínimo OU negativo (venda além do estoque).
+          const alerta = estaAcabando(Number(it.estoque), Number(it.estoque_minimo), it.controla_estoque) || Number(it.estoque) < 0;
           return (
             <li key={it.id} className={idx !== arr.length - 1 ? "border-b border-borda" : ""}>
               <div className="flex items-center justify-between px-5 py-3 text-sm">
@@ -29,7 +30,7 @@ export default async function Itens() {
                   <p className="text-marca">{it.nome}</p>
                   <p className="text-xs text-texto-suave">
                     {formatarBRL(Number(it.preco))} / {it.unidade}
-                    {it.controla_estoque && <> · estoque <span className={acabando ? "text-saida" : "text-texto"}>{it.estoque}</span>{acabando ? " (acabando)" : ""}</>}
+                    {it.controla_estoque && <> · estoque <span className={alerta ? "text-saida" : "text-texto"}>{it.estoque}</span>{alerta ? " (acabando)" : ""}</>}
                   </p>
                 </div>
                 <form action={excluirItemForm.bind(null, it.id)}>
