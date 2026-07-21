@@ -16,6 +16,11 @@ export default async function Lancamentos({
   const { data: categorias } = await supabase
     .from("categorias").select("id, nome, tipo").eq("negocio_id", negocio.id).order("nome");
 
+  const { data: itensVenda } = negocio.usa_estoque
+    ? await supabase.from("itens").select("id, nome, preco, unidade, estoque, controla_estoque")
+        .eq("negocio_id", negocio.id).eq("tipo", "venda").eq("ativo", true).order("nome")
+    : { data: [] };
+
   let q = supabase.from("lancamentos")
     .select("id, tipo, descricao, valor, data, origem, eh_retirada")
     .eq("negocio_id", negocio.id)
@@ -34,7 +39,9 @@ export default async function Lancamentos({
       <details open={searchParams?.novo === "1"} className="border border-borda bg-superficie">
         <summary className="cursor-pointer px-5 py-3 text-sm font-semibold uppercase tracking-wider text-marca">Novo lançamento</summary>
         <div className="border-t border-borda p-4">
-          <FormLancamento categorias={categorias ?? []} usaCarteiras={negocio.usa_carteiras} hoje={hojeStr} />
+          <FormLancamento categorias={categorias ?? []} usaCarteiras={negocio.usa_carteiras} hoje={hojeStr}
+            usaEstoque={negocio.usa_estoque}
+            itensVenda={(itensVenda ?? []).map((i) => ({ ...i, preco: Number(i.preco) }))} />
         </div>
       </details>
 
