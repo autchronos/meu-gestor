@@ -105,10 +105,9 @@ export async function excluirReceber(id: string) {
   return { ok: true };
 }
 
-// Wrappers void para usar direto em <form action> (Server Actions registradas).
+// Wrappers void para usar direto em <form action> das ações de "marcar pago".
 // Um closure inline que só chama a ação original NÃO é uma Server Action e
 // derruba a pagina em runtime; estes exports do modulo "use server" são válidos.
-// (Mesmo padrão de excluirClienteForm em src/app/painel/clientes/acoes.ts.)
 export async function marcarPagoForm(id: string) {
   await marcarPago(id);
 }
