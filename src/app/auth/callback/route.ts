@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
+import { destinoSeguro } from "@/lib/auth/destino";
 
 function voltarComErro(origin: string, mensagem: string) {
   return NextResponse.redirect(
@@ -22,8 +23,10 @@ export async function GET(request: NextRequest) {
     const supabase = criarClienteServidor();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      // Autenticado: o /painel decide se manda para o onboarding.
-      return NextResponse.redirect(`${origin}/painel`);
+      // Destino validado (recuperação → /nova-senha, confirmação → /confirmado);
+      // sem next, cai no /painel (que decide se manda para o onboarding).
+      const next = destinoSeguro(searchParams.get("next"));
+      return NextResponse.redirect(`${origin}${next}`);
     }
   }
 
