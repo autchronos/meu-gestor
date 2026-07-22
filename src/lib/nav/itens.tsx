@@ -1,6 +1,6 @@
 import {
   LayoutGrid, ScrollText, ArrowUpFromLine, Tags, BarChart3, Settings,
-  HandCoins, Users, Package, PackageOpen,
+  HandCoins, Users, Package, PackageOpen, LifeBuoy,
   type LucideIcon,
 } from "lucide-react";
 
@@ -39,6 +39,7 @@ export function itensNav(flags: Flags): ItemNav[] {
   }
   itens.push({ href: "/painel/categorias", rotulo: "Categorias", Icone: Tags });
   itens.push({ href: "/painel/relatorios", rotulo: "Relatórios", Icone: BarChart3 });
+  itens.push({ href: "/painel/suporte", rotulo: "Suporte", Icone: LifeBuoy });
   itens.push({ href: "/painel/configuracoes", rotulo: "Config", Icone: Settings });
   return itens;
 }

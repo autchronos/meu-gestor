@@ -101,6 +101,12 @@ await cli.from("locacoes").update({ devolvido_em: hojeIso2 }).eq("id", loc.id);
 const { data: abertas2 } = await cli.from("locacoes").select("id").eq("item_id", itAl.id).is("devolvido_em", null);
 assert((abertas2 ?? []).length === 0, "apos devolucao, item sem locacao aberta");
 
+// Fase 5.8: suporte (usuario insere e le a propria mensagem via RLS own-row).
+const { error: eSup } = await cli.from("suporte").insert({ negocio_id: negId, tipo: "sugestao", mensagem: "teste de suporte" });
+assert(!eSup, "inseriu mensagem de suporte");
+const { data: sup } = await cli.from("suporte").select("id, tipo").eq("negocio_id", negId);
+assert((sup ?? []).length === 1 && sup[0].tipo === "sugestao", `le a propria mensagem (veio ${sup?.length})`);
+
 await admin.from("negocios").delete().eq("id", negId);
 await admin.auth.admin.deleteUser(u.user.id);
 console.log("RESUMO OK");
