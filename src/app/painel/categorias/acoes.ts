@@ -19,6 +19,8 @@ export async function criarCategoria(nome: string, tipo: "entrada" | "saida") {
 
 export async function excluirCategoria(id: string) {
   const supabase = criarClienteServidor();
-  await supabase.from("categorias").delete().eq("id", id);
+  const { error } = await supabase.from("categorias").delete().eq("id", id);
+  if (error) return { erro: "Não foi possível excluir a categoria." };
   revalidatePath("/painel/categorias");
+  return { ok: true };
 }

@@ -93,4 +93,3 @@ export async function excluirLocacao(id: string) {
 }
 
 export async function marcarDevolucaoForm(id: string) { await marcarDevolucao(id); }
-export async function excluirLocacaoForm(id: string) { await excluirLocacao(id); }

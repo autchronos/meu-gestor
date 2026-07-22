@@ -116,7 +116,3 @@ export async function marcarPagoForm(id: string) {
 export async function desmarcarPagoForm(id: string) {
   await desmarcarPago(id);
 }
-
-export async function excluirReceberForm(id: string) {
-  await excluirReceber(id);
-}

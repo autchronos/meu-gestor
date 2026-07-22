@@ -53,10 +53,6 @@ export async function excluirItem(id: string) {
   return { ok: true };
 }
 
-export async function excluirItemForm(id: string) {
-  await excluirItem(id);
-}
-
 export async function reporEstoque(id: string, quantidade: number, pago: number) {
   if (!Number.isFinite(quantidade) || quantidade === 0) return { erro: "Informe a quantidade a repor (ou tirar)." };
   const g = await guarda();
