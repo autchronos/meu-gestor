@@ -107,6 +107,11 @@ assert(!eSup, "inseriu mensagem de suporte");
 const { data: sup } = await cli.from("suporte").select("id, tipo").eq("negocio_id", negId);
 assert((sup ?? []).length === 1 && sup[0].tipo === "sugestao", `le a propria mensagem (veio ${sup?.length})`);
 
+// Fase 5.9: admin responde (service_role) e o usuario le a resposta (own-row).
+await admin.from("suporte").update({ resposta: "obrigado!", status: "respondido", respondido_em: new Date().toISOString() }).eq("negocio_id", negId);
+const { data: sup2 } = await cli.from("suporte").select("resposta, status").eq("negocio_id", negId).maybeSingle();
+assert(sup2?.resposta === "obrigado!" && sup2?.status === "respondido", `usuario le a resposta do admin (veio ${sup2?.status})`);
+
 await admin.from("negocios").delete().eq("id", negId);
 await admin.auth.admin.deleteUser(u.user.id);
 console.log("RESUMO OK");
