@@ -1,11 +1,14 @@
 import { redirect } from "next/navigation";
+import { PackageOpen } from "lucide-react";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { negocioAtual } from "@/lib/supabase/negocioAtual";
 import { formatarBRL } from "@/lib/formato";
 import { hojeSP } from "@/lib/caixa/periodo";
 import { estaAtrasada } from "@/lib/locacao/calculos";
 import { FormLocacao } from "@/app/painel/locacoes/FormLocacao";
-import { marcarDevolucaoForm, excluirLocacaoForm } from "@/app/painel/locacoes/acoes";
+import { marcarDevolucaoForm, excluirLocacao } from "@/app/painel/locacoes/acoes";
+import { BotaoExcluir } from "@/components/BotaoExcluir";
+import { EstadoVazio } from "@/components/EstadoVazio";
 
 type Linha = {
   id: string; quantidade: number; valor: number; data_retirada: string;
@@ -48,6 +51,9 @@ export default async function Locacoes({ searchParams }: { searchParams: { novo?
       </details>
 
       <h2 className="text-sm font-semibold uppercase tracking-wider text-marca">Na rua</h2>
+      {abertas.length === 0 ? (
+        <EstadoVazio Icone={PackageOpen} titulo="Nenhuma locação em aberto" descricao="Quando você alugar um item, ele aparece aqui até a devolução." />
+      ) : (
       <ul className="border border-borda bg-superficie">
         {abertas.map((l, idx, arr) => {
           const atrasada = estaAtrasada(l.devolucao_prevista, l.devolvido_em, hoje);
@@ -65,15 +71,13 @@ export default async function Locacoes({ searchParams }: { searchParams: { novo?
                 <form action={marcarDevolucaoForm.bind(null, l.id)}>
                   <button type="submit" className="text-xs font-semibold uppercase tracking-wider text-entrada hover:opacity-80">Marcar devolução</button>
                 </form>
-                <form action={excluirLocacaoForm.bind(null, l.id)}>
-                  <button type="submit" className="text-xs text-texto-suave hover:text-saida">Excluir</button>
-                </form>
+                <BotaoExcluir acao={excluirLocacao} id={l.id} />
               </div>
             </li>
           );
         })}
-        {abertas.length === 0 && <li className="px-5 py-3 text-sm text-texto-suave">Nenhuma locação em aberto.</li>}
       </ul>
+      )}
 
       {devolvidas.length > 0 && (
         <>

@@ -1,9 +1,12 @@
+import { ScrollText } from "lucide-react";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { negocioAtual } from "@/lib/supabase/negocioAtual";
 import { formatarBRL } from "@/lib/formato";
 import { hojeSP, intervaloPeriodo } from "@/lib/caixa/periodo";
 import { FormLancamento } from "@/app/painel/lancamentos/FormLancamento";
 import { excluirLancamento } from "@/app/painel/lancamentos/acoes";
+import { BotaoExcluir } from "@/components/BotaoExcluir";
+import { EstadoVazio } from "@/components/EstadoVazio";
 
 export default async function Lancamentos({
   searchParams,
@@ -61,25 +64,26 @@ export default async function Lancamentos({
         <button type="submit" className="border border-borda px-3 py-1 uppercase tracking-wider text-texto-suave hover:text-texto">Filtrar</button>
       </form>
 
-      <ul className="border border-borda bg-superficie">
-        {(lancamentos ?? []).map((l, idx) => (
-          <li key={l.id} className={`flex items-center justify-between gap-2 px-5 py-3 text-sm ${idx !== (lancamentos ?? []).length - 1 ? "border-b border-borda" : ""}`}>
-            <div className="min-w-0">
-              <p className="truncate text-marca">{l.descricao}{l.eh_retirada ? " (retirada)" : ""}</p>
-              <p className="text-xs text-texto-suave">{new Date(l.data + "T00:00:00").toLocaleDateString("pt-BR")} · {l.origem}</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className={`tabular-nums ${l.tipo === "entrada" ? "text-entrada" : "text-saida"}`}>
-                {l.tipo === "entrada" ? "+" : "−"}{formatarBRL(Number(l.valor))}
-              </span>
-              <form action={excluirLancamento.bind(null, l.id)}>
-                <button type="submit" className="text-xs text-texto-suave hover:text-saida">excluir</button>
-              </form>
-            </div>
-          </li>
-        ))}
-        {(lancamentos ?? []).length === 0 && <li className="px-5 py-8 text-center text-sm text-texto-suave">Nenhum lançamento no período.</li>}
-      </ul>
+      {(lancamentos ?? []).length === 0 ? (
+        <EstadoVazio Icone={ScrollText} titulo="Nenhum lançamento no período" descricao="Ajuste o filtro acima ou registre uma entrada/saída no formulário." />
+      ) : (
+        <ul className="border border-borda bg-superficie">
+          {(lancamentos ?? []).map((l, idx) => (
+            <li key={l.id} className={`flex items-center justify-between gap-2 px-5 py-3 text-sm ${idx !== (lancamentos ?? []).length - 1 ? "border-b border-borda" : ""}`}>
+              <div className="min-w-0">
+                <p className="truncate text-marca">{l.descricao}{l.eh_retirada ? " (retirada)" : ""}</p>
+                <p className="text-xs text-texto-suave">{new Date(l.data + "T00:00:00").toLocaleDateString("pt-BR")} · {l.origem}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className={`tabular-nums ${l.tipo === "entrada" ? "text-entrada" : "text-saida"}`}>
+                  {l.tipo === "entrada" ? "+" : "−"}{formatarBRL(Number(l.valor))}
+                </span>
+                <BotaoExcluir acao={excluirLancamento} id={l.id} label="excluir" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

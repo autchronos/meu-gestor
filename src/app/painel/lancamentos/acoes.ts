@@ -104,8 +104,10 @@ export async function registrarVenda(d: { itens: LinhaVendaInput[]; categoria_id
 
 export async function excluirLancamento(id: string) {
   const supabase = criarClienteServidor();
-  await supabase.from("lancamentos").delete().eq("id", id);
+  const { error } = await supabase.from("lancamentos").delete().eq("id", id);
+  if (error) return { erro: "Não foi possível excluir o lançamento." };
   revalidatePath("/painel");
   revalidatePath("/painel/lancamentos");
   revalidatePath("/painel/itens"); // excluir venda com itens devolve estoque (trigger)
+  return { ok: true };
 }
