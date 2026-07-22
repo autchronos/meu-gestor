@@ -1,11 +1,14 @@
 import { redirect } from "next/navigation";
+import { HandCoins } from "lucide-react";
 import { criarClienteServidor } from "@/lib/supabase/servidor";
 import { negocioAtual } from "@/lib/supabase/negocioAtual";
 import { formatarBRL } from "@/lib/formato";
 import { hojeSP } from "@/lib/caixa/periodo";
 import { liquido, estaVencida } from "@/lib/receber/calculos";
 import { FormReceber } from "@/app/painel/a-receber/FormReceber";
-import { marcarPagoForm, desmarcarPagoForm, excluirReceberForm } from "@/app/painel/a-receber/acoes";
+import { marcarPagoForm, desmarcarPagoForm, excluirReceber } from "@/app/painel/a-receber/acoes";
+import { BotaoExcluir } from "@/components/BotaoExcluir";
+import { EstadoVazio } from "@/components/EstadoVazio";
 
 type Linha = {
   id: string; descricao: string; valor: number; vencimento: string | null;
@@ -48,6 +51,9 @@ export default async function AReceber({ searchParams }: { searchParams: { novo?
       </div>
 
       <h2 className="text-sm font-semibold uppercase tracking-wider text-marca">Abertas</h2>
+      {abertas.length === 0 ? (
+        <EstadoVazio Icone={HandCoins} titulo="Nenhuma conta em aberto" descricao="As vendas a prazo que você registrar aparecem aqui até serem pagas." />
+      ) : (
       <ul className="border border-borda bg-superficie">
         {abertas.map((r, idx, arr) => {
           const vencida = estaVencida(r.vencimento, hoje);
@@ -68,9 +74,7 @@ export default async function AReceber({ searchParams }: { searchParams: { novo?
                 <form action={marcarPagoForm.bind(null, r.id)}>
                   <button type="submit" className="text-xs font-semibold uppercase tracking-wider text-entrada hover:opacity-80">Marcar pago</button>
                 </form>
-                <form action={excluirReceberForm.bind(null, r.id)}>
-                  <button type="submit" className="text-xs text-texto-suave hover:text-saida">Excluir</button>
-                </form>
+                <BotaoExcluir acao={excluirReceber} id={r.id} />
                 <details className="w-full">
                   <summary className="cursor-pointer text-xs uppercase tracking-wider text-texto-suave">Editar</summary>
                   <div className="pt-3">
@@ -84,8 +88,8 @@ export default async function AReceber({ searchParams }: { searchParams: { novo?
             </li>
           );
         })}
-        {abertas.length === 0 && <li className="px-5 py-3 text-sm text-texto-suave">Nenhuma conta aberta.</li>}
       </ul>
+      )}
 
       {pagas.length > 0 && (
         <>
