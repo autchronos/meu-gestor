@@ -32,7 +32,7 @@ export default async function Suporte() {
             <li key={m.id} className={`px-5 py-3 text-sm ${idx !== arr.length - 1 ? "border-b border-borda" : ""}`}>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold uppercase tracking-wider text-marca">{ROTULO[m.tipo] ?? m.tipo}</span>
-                <span className="text-xs text-texto-suave">{STATUS[m.status] ?? m.status} · {new Date(m.created_at).toLocaleDateString("pt-BR")}</span>
+                <span className="text-xs text-texto-suave">{STATUS[m.status] ?? m.status} · {new Date(m.created_at).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}</span>
               </div>
               <p className="mt-1 whitespace-pre-wrap text-texto">{m.mensagem}</p>
             </li>

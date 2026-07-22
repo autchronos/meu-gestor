@@ -16,7 +16,7 @@ export function FormSuporte() {
       const r = await enviarSuporte({ tipo, mensagem, contato });
       if (r?.erro) { setMsg(r.erro); return; }
       setMsg("Recebemos sua mensagem. Obrigado!");
-      setMensagem(""); setContato("");
+      setMensagem(""); setContato(""); setTipo("sugestao");
     });
   }
 
