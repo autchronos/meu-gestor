@@ -38,3 +38,8 @@ test("aceita campos alternativos (messageid, content, chatid)", () => {
   const alt = { message: { messageid: "ID2", chatid: "5511888888888@s.whatsapp.net", content: "saldo" } };
   expect(extrairMensagem(alt)).toMatchObject({ remetente: "5511888888888", texto: "saldo", messageId: "ID2" });
 });
+
+test("não lança e retorna null quando text/content não é string", () => {
+  expect(extrairMensagem({ message: { id: "x", sender: "5511999999999@s.whatsapp.net", text: 123 } })).toBeNull();
+  expect(extrairMensagem({ message: { id: "x", sender: "5511999999999@s.whatsapp.net", content: { foo: 1 } } })).toBeNull();
+});

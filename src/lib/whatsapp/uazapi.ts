@@ -17,9 +17,10 @@ export function extrairMensagem(payload: unknown): MensagemRecebida | null {
   const m = p?.message;
   if (!m || typeof m !== "object") return null;
 
-  const messageId = (m.id as string) || (m.messageid as string) || "";
-  const texto = ((m.text as string) || (m.content as string) || "").trim();
-  const bruto = (m.sender as string) || (m.chatid as string) || "";
+  const messageId = typeof m.id === "string" ? m.id : typeof m.messageid === "string" ? m.messageid : "";
+  const txt = m.text ?? m.content;
+  const texto = (typeof txt === "string" ? txt : "").trim();
+  const bruto = m.sender ?? m.chatid;
   const remetente = digitos(bruto);
   if (!messageId || !texto || !remetente) return null;
 
