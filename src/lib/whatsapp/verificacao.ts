@@ -28,7 +28,7 @@ export async function consumirCodigo(
   if (eTel) return null;
 
   const { data: neg } = await admin.from("negocios").select("nome").eq("id", negocioId).maybeSingle();
-  await admin.from("whatsapp_verificacoes").delete().eq("negocio_id", negocioId);
+  await admin.from("whatsapp_verificacoes").delete().eq("codigo", codigo);
 
   return { negocioId, nomeNegocio: (neg?.nome as string) ?? "seu negócio" };
 }
