@@ -45,7 +45,7 @@ export function ConectarWhatsApp({ numeroSugerido, conectados }: { numeroSugerid
           <p className="text-texto-suave">O código expira em 10 minutos.</p>
         </div>
       )}
-      {erro && <p role="status" className="text-sm text-saida">{erro}</p>}
+      {erro && <p role="alert" className="text-sm text-saida">{erro}</p>}
     </div>
   );
 }

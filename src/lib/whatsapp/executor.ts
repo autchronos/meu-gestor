@@ -22,16 +22,12 @@ export async function resolverNegocioPorTelefone(
   return n ?? null;
 }
 
-// Saldo disponível = SUM(entrada − saida) para carteira='empresa'. Query direta
-// (service_role + negocio_id explícito); NÃO usa resumo_dashboard, que exige
-// auth.uid() (e_membro) e estouraria "acesso negado" sob service_role.
+// Saldo disponivel (empresa) somado no servidor via RPC saldo_empresa — evita o
+// teto de 1000 linhas do PostgREST. NAO usa resumo_dashboard (aquele faz e_membro
+// e estouraria sob service_role). saldo_empresa nao checa e_membro: e service-role-only.
 async function disponivel(admin: SupabaseClient, negocioId: string): Promise<number> {
-  const { data } = await admin
-    .from("lancamentos").select("tipo, valor")
-    .eq("negocio_id", negocioId).eq("carteira", "empresa");
-  let s = 0;
-  for (const l of data ?? []) s += l.tipo === "entrada" ? Number(l.valor) : -Number(l.valor);
-  return s;
+  const { data } = await admin.rpc("saldo_empresa", { p_negocio_id: negocioId });
+  return Number(data ?? 0);
 }
 
 export async function executarComando(
@@ -50,7 +46,7 @@ export async function executarComando(
       },
       { onConflict: "negocio_id,origem_msg_id", ignoreDuplicates: true },
     );
-    return mensagemRegistrado(cmd.tipo, cmd.valor, cmd.descricao, await disponivel(admin, negocio.id));
+    return mensagemRegistrado(cmd.tipo, cmd.valor, descricao, await disponivel(admin, negocio.id));
   }
 
   if (cmd.tipo === "consulta_saldo") {

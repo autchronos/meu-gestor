@@ -29,6 +29,7 @@ export async function renomearNegocio(nome: string) {
 }
 
 export async function conectarWhatsApp(): Promise<{ codigo: string; link: string } | { erro: string }> {
+  if (!process.env.UAZAPI_NUMERO_BOT) return { erro: "Configuração do WhatsApp indisponível no momento." };
   const negocio = await negocioAtual();
   if (!negocio) return { erro: "Negócio não encontrado." };
   const supabase = criarClienteServidor();
@@ -39,7 +40,6 @@ export async function conectarWhatsApp(): Promise<{ codigo: string; link: string
     .from("whatsapp_verificacoes")
     .upsert({ negocio_id: negocio.id, codigo, expira_em: expira }, { onConflict: "negocio_id" });
   if (error) return { erro: "Não foi possível gerar o código." };
-  const numeroBot = process.env.UAZAPI_NUMERO_BOT ?? "";
-  const link = `https://wa.me/${numeroBot}?text=${encodeURIComponent(`AUTCHRONOS ${codigo}`)}`;
+  const link = `https://wa.me/${process.env.UAZAPI_NUMERO_BOT}?text=${encodeURIComponent(`AUTCHRONOS ${codigo}`)}`;
   return { codigo, link };
 }
