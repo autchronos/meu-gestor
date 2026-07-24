@@ -10,21 +10,28 @@ function digitos(s: unknown): string {
   return typeof s === "string" ? s.replace(/@.*/, "").replace(/\D/g, "") : "";
 }
 
-// Tolerante: lê nomes de campo comuns do uazapiGO v2. Retorna null para
-// qualquer coisa que não seja uma mensagem de texto processável.
+// Primeiro valor que for uma string não-vazia (tolera campos ausentes/nulos).
+function primeiroTexto(...vals: unknown[]): string {
+  for (const v of vals) if (typeof v === "string" && v !== "") return v;
+  return "";
+}
+
+// Tolerante ao payload real do uazapiGO v2 (confirmado contra webhook de verdade).
+// Retorna null para qualquer coisa que não seja uma mensagem de texto processável.
 export function extrairMensagem(payload: unknown): MensagemRecebida | null {
   const p = payload as { message?: Record<string, unknown> } | null;
   const m = p?.message;
   if (!m || typeof m !== "object") return null;
 
-  const messageId = typeof m.id === "string" ? m.id : typeof m.messageid === "string" ? m.messageid : "";
-  const txt = m.text ?? m.content;
-  const texto = (typeof txt === "string" ? txt : "").trim();
-  const bruto = m.sender ?? m.chatid;
-  const remetente = digitos(bruto);
+  const messageId = primeiroTexto(m.messageid, m.id);
+  const texto = primeiroTexto(m.text, m.content).trim();
+  // O NÚMERO real vem em sender_pn/chatid (@s.whatsapp.net). NÃO usar `sender`,
+  // que no WhatsApp atual pode ser um @lid (LinkedID) — não é o telefone.
+  const chatid = primeiroTexto(m.chatid);
+  const remetente = digitos(primeiroTexto(m.sender_pn, chatid));
   if (!messageId || !texto || !remetente) return null;
 
-  const isGroup = m.isGroup === true || String(bruto).endsWith("@g.us");
+  const isGroup = m.isGroup === true || chatid.endsWith("@g.us");
   const fromMe = m.fromMe === true;
   return { remetente, texto, messageId, fromMe, isGroup };
 }
